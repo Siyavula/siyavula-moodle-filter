@@ -1,0 +1,24 @@
+#page-admin-setting-filtersettingsiyavula .form-item .form-label label span {
+    font-weight: 400;
+}
+
+#page-admin-setting-filtersettingsiyavula div#admin-list_users{
+    padding-top: 20px;
+}
+
+#admin-list_users span.form-shortname.d-block.small.text-muted {
+    display: none !important;
+}
+
+#page-filter-siyavula-test_external_usertoken #email{
+    width: 30%;
+}
+
+#page-filter-siyavula-test_external_usertoken .alert.alert-danger,
+#page-filter-siyavula-test_external_usertoken .alert.alert-success{
+    top: 30px;
+}
+
+form#form_test_token{
+    padding-top: 60px;
+}

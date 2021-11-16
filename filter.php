@@ -1,4 +1,6 @@
 <?php
+header('Access-Control-Allow-Origin: *');
+header("Access-Control-Allow-Headers: *");
 require_once ($CFG->dirroot . '/filter/siyavula/lib.php');
 
 class filter_siyavula extends moodle_text_filter
@@ -37,12 +39,15 @@ class filter_siyavula extends moodle_text_filter
             exit();
         }
         
-        $client_ip = $_SERVER['REMOTE_ADDR'];
+        $client_ip       = $_SERVER['REMOTE_ADDR'];
         $siyavula_config = get_config('filter_siyavula');
 
         $token = siyavula_get_user_token($siyavula_config, $client_ip);
-
+       
         $user_token = siyavula_get_external_user_token($siyavula_config, $client_ip, $token);
+        
+        $qtpractice = false; 
+        $syquestion = false;
         
         //[[sy-2632]] or [[sy-2632,sy-4429]] - Standalone questions
         $findsy = 'sy-';
@@ -207,7 +212,7 @@ class filter_siyavula extends moodle_text_filter
                 break;
             }
         }
-
+        
         //Render questions not apply format siyavula
         if(!empty($result)){
             return $result;
