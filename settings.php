@@ -1,7 +1,6 @@
 <?php
-
+defined('MOODLE_INTERNAL') || die();
 require_once ($CFG->dirroot . '/filter/siyavula/lib.php');
-
 global $PAGE, $OUTPUT;
 
 $settings->add(new admin_setting_configtext('filter_siyavula/url_base',
@@ -76,5 +75,30 @@ if(!empty($get_users) && !empty($tokenresponse)){
 }
 
 if ($data = data_submitted() and confirm_sesskey() and isset($data->action) and $data->action == 'save-settings') {
-    validate_params($data);
+        validate_params($data);
 } 
+
+//Show messages if filter response correct create Token and external toke....
+if(get_config('filter_siyavula', 'admin_show_siyavula_notify_error') == true){
+        $siyavula_config_messages = get_config('filter_siyavula');
+
+        if(isset($siyavula_config_messages->admin_show_message_error)){
+           $messages = $siyavula_config_messages->admin_show_message_error;
+        }
+        
+        \core\notification::error($messages);
+        set_config('admin_show_siyavula_notify_error', false, 'filter_siyavula');
+        set_config('admin_show_message_error', false, 'filter_siyavula');
+        
+        
+}else if(get_config('filter_siyavula', 'admin_show_siyavula_notify_succes') == true){
+        $siyavula_config_messages = get_config('filter_siyavula');
+
+        if(isset($siyavula_config_messages->admin_show_message_success)){
+           $messages = $siyavula_config_messages->admin_show_message_success;
+        }
+        
+        \core\notification::info($messages);
+        set_config('admin_show_siyavula_notify_succes', false, 'filter_siyavula');
+        set_config('admin_show_message_success', false, 'filter_siyavula');
+}
