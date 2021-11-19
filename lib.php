@@ -179,7 +179,8 @@ function siyavula_debug_message($name_function, $api_route, $payload, $response,
         $errors = get_string('client_header','filter_siyavula');
     }
  
-    $print_debuginfo = '<div class="alert alert-danger" role="alert">
+   if($siyavula_config->debug_enabled == 1 || $CFG->debugdisplay == 1){
+            $print_debuginfo = '<div class="alert alert-danger" role="alert">
                              <span><strong>'.get_string('info_filter', 'filter_siyavula').'</strong></span>'.$message.' <br>
                             '.$function.'<br>
                             '.$apiroute.'<br>
@@ -196,19 +197,19 @@ function siyavula_debug_message($name_function, $api_route, $payload, $response,
                             <span><strong>'.get_string('info_message_response','filter_siyavula').'</strong></span> <br>
                             '.$errors.'<br>
                         </div>';
+            
+        $print_token = '<div class="alert alert-danger" role="alert">
+                                <span><strong>'.get_string('token', 'filter_siyavula').'</strong></span>' . $message.' <br>
+                        </div>';
+                        
+        $print_token = '<div class="alert alert-danger" role="alert">
+                                <span><strong>'.get_string('token', 'filter_siyavula').'</strong></span>' . $message.' <br>
+                        </div>';
+        
+        echo $print_debuginfo;
+        echo $print_token;
+    }
     
-    $print_token = '<div class="alert alert-danger" role="alert">
-                            <span><strong>'.get_string('token', 'filter_siyavula').'</strong></span>' . $message.' <br>
-                    </div>';
-                    
-    $print_token = '<div class="alert alert-danger" role="alert">
-                            <span><strong>'.get_string('token', 'filter_siyavula').'</strong></span>' . $message.' <br>
-                    </div>';
-    
-    echo $print_debuginfo;
-    echo $print_token;
-
-
     /*error_reporting(E_ALL); // NOT FOR PRODUCTION SERVERS!
     @ini_set('display_errors', '1');    // NOT FOR PRODUCTION SERVERS!
     $CFG->debug = (E_ALL | E_STRICT);   // === DEBUG_DEVELOPER - NOT FOR PRODUCTION SERVERS!
@@ -217,7 +218,7 @@ function siyavula_debug_message($name_function, $api_route, $payload, $response,
 
 function validate_params($data){
     
-    global $CFG, $PAGE;
+    global $CFG, $PAGE, $OUTPUT;
 
     saved_data($data);
     
@@ -233,7 +234,6 @@ function validate_params($data){
         $success  = '<span>'.get_string('urlbasesuccess', 'filter_siyavula').'</span><br>';
     }
     
-    
     $get_token = siyavula_get_user_token($siyavula_config,$client_ip);
     
     if($get_token == NULL){
@@ -247,21 +247,25 @@ function validate_params($data){
     if($external_token->token == NULL){
         $message .= '<span>'.get_string('token_externalerror','filter_siyavula').'</span><br>';
     }else{
-        $success  .= '<span>'.get_string('token_externalgenerated','filter_siyavula').'</span><br>';
+        $success  .= '<span class="token_success">'.get_string('token_externalgenerated','filter_siyavula').'</span><br>';
     }
+    
     
     if($PAGE->pagetype == 'admin-setting-filtersettingsiyavula'){
         if($message != NULL){
-            redirect($PAGE->url,$message,null,\core\output\notification::NOTIFY_ERROR);
+            set_config('admin_show_siyavula_notify_error',  true, 'filter_siyavula');
+            set_config('admin_show_message_error', $message, 'filter_siyavula');
         }else{
-            //saved_data($data);
-            redirect($PAGE->url,$success,null,\core\output\notification::NOTIFY_INFO);
+            set_config('admin_show_siyavula_notify_succes', true, 'filter_siyavula');
+            set_config('admin_show_message_success', $success, 'filter_siyavula');
         }
     }
+
     
 }
 
 function saved_data($data){
+    global $PAGE;
     $newdata = (array)$data;
     unset($newdata['section']);
     unset($newdata['action']);
@@ -272,6 +276,7 @@ function saved_data($data){
         $name = str_replace('s_filter_siyavula_','',$name);
         set_config($name,$value,'filter_siyavula');
     }
+    
 }
 
 function get_list_users($siyavula_config,$token){
