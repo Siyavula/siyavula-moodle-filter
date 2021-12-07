@@ -28,6 +28,7 @@ class filter_siyavula extends moodle_text_filter
 
     public function filter($text, array $options = array())
     {
+
         global $OUTPUT, $USER, $PAGE, $CFG, $DB;
         
         //Verify if user not authenticated
@@ -56,7 +57,7 @@ class filter_siyavula extends moodle_text_filter
         //[[syp-204]] - Practice questions 
         $findpr = 'syp-';
         $pospr = strpos($text, $findpr);
-
+  
         if ($possy != false)
         {
             $syquestion = true;
@@ -66,17 +67,13 @@ class filter_siyavula extends moodle_text_filter
             $qtpractice = true; 
         }
         
-        //Get type siyavulaqt
-        $compare_scale_clause = $DB->sql_compare_text('questiontext')  . ' = ' . $DB->sql_compare_text(':type');
-        $typename = $DB->get_record_sql("select * from {question} where $compare_scale_clause",array('type' => $text));
-
         //Get user inside in quiz attempt
         $url = $_SERVER["REQUEST_URI"];
         $findme  = '/mod/quiz/attempt.php';
         $pos = strpos($url, $findme);
         
         //Question type standalone
-        if (!$user_auth && $syquestion)
+        if (!$user_auth && $syquestion && $pos === false)
         {
             $newtext = strip_tags($text);
             $global_ids = [];
@@ -112,27 +109,87 @@ class filter_siyavula extends moodle_text_filter
                 $siyavula_activity_id = $show_id;
                 $next_id = $this->check_if_next($all_ids, $siyavula_activity_id);
 
-                $templatecontext[] = ['template_id' => $siyavula_activity_id, 'user_token' => $user_token->token, 'token' => $token, 'baseUrl' => $siyavula_config->url_base, 'randomSeed' => 3527, 'all_ids' => implode('|', $all_ids) , 'current_url' => $currenturl, 'next' => $next_id, ];
+                $templatecontext[] = ['template_id' => $siyavula_activity_id, 
+                                      'user_token' => $user_token->token, 
+                                      'token' => $token, 
+                                      'baseUrl' => $siyavula_config->url_base, 
+                                      'randomSeed' => 3527, 
+                                      'all_ids' => implode('|', $all_ids) , 
+                                      'current_url' => $currenturl, 
+                                      'next' => $next_id, 
+                                      ];
+                                      
+                $external_token = $user_token->token;
+                $activityType = 'standalone';
+                $template_id  = $siyavula_activity_id;
+                $randomseed = '3527';
+                $baseurl = $siyavula_config->url_base;
+                $idsq = implode('|', $all_ids);
+                
+                $questionapi = get_activity_standalone($siyavula_activity_id,$token, $user_token->token,$siyavula_config->url_base,3527);
+                $activityid  = $questionapi->activity->id;
+                $responseid  = $questionapi->response->id;
+                
                 echo '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
-                $result = $OUTPUT->render_from_template('filter_siyavula/standalone', ["renderall" => $templatecontext]);
-            }
-            else
-            {
+                echo '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
+                echo '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
+                echo '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
+                
+                echo '<main class="sv-region-main emas alejo sv">
+                          <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
+                            <div class="question-wrapper">
+                              <div class="question-content">
+                              '.$questionapi->response->question_html.'
+                              </div>
+                            </div>
+                          </div>
+                      </main>
+                      <a href="" id="a_next"><button>Next Question</button></a>';
+                
+                $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$idsq,$currenturl->__toString(),$next_id,$siyavula_activity_id]);
+                //$result = $OUTPUT->render_from_template('filter_siyavula/standalone', ["renderall" => $templatecontext]);
+            }else{
                 foreach ($global_ids as $gid)
                 {
-                    $insert_point = strpos($gid, '</siyavula-q>');
 
                     $siyavula_activity_id = $gid;
                     $next_id = $this->check_if_next($global_ids, $siyavula_activity_id);
                     $templatecontext[] = ['template_id' => $siyavula_activity_id, 'user_token' => $user_token->token, 'token' => $token, 'baseUrl' => $siyavula_config->url_base, 'randomSeed' => 3527, 'all_ids' => implode('|', $global_ids) , 'current_url' => $currenturl, 'next' => $next_id, ];
-
+                    
+                    $idsq = implode('|', $all_ids);
+                    $external_token = $user_token->token;
+                    $activityType = 'standalone';
+                    $template_id  = $siyavula_activity_id;
+                    $randomseed = '3527';
+                    $baseurl = $siyavula_config->url_base;
+                    
+                    $questionapi = get_activity_standalone($siyavula_activity_id,$token, $user_token->token,$siyavula_config->url_base,3527);
+                    $activityid  = $questionapi->activity->id;
+                    $responseid  = $questionapi->response->id;
+          
                     echo '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
-
-                    $result = $OUTPUT->render_from_template('filter_siyavula/standalone', ["renderall" => $templatecontext]);
+                    echo '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
+                    echo '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
+                    echo '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
+                  
+                    echo '<main class="sv-region-main alejo emas sv">
+                              <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
+                                <div class="question-wrapper">
+                                  <div class="question-content">
+                                  '.$questionapi->response->question_html.'
+                                  </div>
+                                </div>
+                              </div>
+                          </main>
+                          <a href="" id="a_next"><button>Next Question</button></a>';
+                    
+                    $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$idsq,$currenturl->__toString(),$next_id,$siyavula_activity_id]);
+                    //$result = $OUTPUT->render_from_template('filter_siyavula/standalone', ["renderall" => $templatecontext]);
                     break;
                 }
             }
-        }else if($pos === 0 && $typename->qtype === "siyavulaqt"){
+        }else if($pos === 0){
+
             $newtext = strip_tags($text);
             
             $global_ids = [];
@@ -149,6 +206,7 @@ class filter_siyavula extends moodle_text_filter
             $currenturl = $PAGE->URL;
             if ($param_all_id)
             {
+            
                 $all_ids = explode('|', $param_all_id);
                 $first_id = $all_ids[0];
 
@@ -164,14 +222,13 @@ class filter_siyavula extends moodle_text_filter
             {
                 foreach ($global_ids as $gid)
                 {
-                    $insert_point = strpos($gid, '</siyavula-q>');
-
+  
                     $siyavula_activity_id = $gid;
-                    $next_id = $this->check_if_next($global_ids, $siyavula_activity_id);
-                    $templatecontext[] = ['template_id' => $siyavula_activity_id, 'user_token' => $user_token->token, 'token' => $token, 'baseUrl' => $siyavula_config->url_base, 'randomSeed' => 3527, 'all_ids' => implode('|', $global_ids) , 'current_url' => $currenturl, 'next' => $next_id, ];
+                    $replacetag = str_replace("sy-",' ',$siyavula_activity_id);
+                    $next_id = $this->check_if_next($global_ids, $replacetag);
+                    $templatecontext[] = ['template_id' => $replacetag, 'user_token' => $user_token->token, 'token' => $token, 'baseUrl' => $siyavula_config->url_base, 'randomSeed' => 3527, 'all_ids' => implode('|', $global_ids) , 'current_url' => $currenturl, 'next' => $next_id, ];
 
                     echo '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
-
                     $result = $OUTPUT->render_from_template('filter_siyavula/standalone', ["renderall" => $templatecontext]);
                     break;
                 }
@@ -181,6 +238,7 @@ class filter_siyavula extends moodle_text_filter
         //Question type practice
         if (!$user_auth && $qtpractice)
         {
+
             $newtext = strip_tags($text);
             $re = '/\[{2}[syp\-\d{1,},?]*\]{2}/m';
 
@@ -195,9 +253,6 @@ class filter_siyavula extends moodle_text_filter
             
             foreach ($global_ids as $gid)
             {
-
-                $insert_point = strpos($gid, '</siyavula-q>');
-
                 $siyavula_activity_id = $gid;
 
                 $templatepractice[] = [
@@ -206,10 +261,81 @@ class filter_siyavula extends moodle_text_filter
                     'token' => $token, 
                     'baseUrl' => $siyavula_config->url_base, ];
                     
-                 echo '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
+                $external_token = $user_token->token;
+                $activityType = 'practice';
+                $template_id  = $siyavula_activity_id;
+                $baseurl = $siyavula_config->url_base;
+                
+                $questionapi = get_activity_practice($siyavula_activity_id,$token, $user_token->token,$siyavula_config->url_base);
+                $activityid  = $questionapi->activity->id;
+                $responseid  = $questionapi->response->id;
+                
+                echo '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
+                echo '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
+                echo '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
+                echo '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
 
-                $result = $OUTPUT->render_from_template('filter_siyavula/practice_responsive', ["renderpractice" => $templatepractice]);
-                break;
+                echo '<main class="sv-region-main emas sv practice-section-question">
+                      <div class="item-psq question">
+                        <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
+                          <div class="question-wrapper">
+                            <div class="question-content">
+                            '.$questionapi->response->question_html.'
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="item-psq">
+                        
+                        <div class="sv-panel-wrapper sv-panel-wrapper--toc">
+                        <div class="sv-panel sv-panel--dashboard sv-panel--toc sv-panel--toc-modern no-secondary-section">
+                          <div class="sv-panel__header">
+                            <div class="sv-panel__title">
+                              Busy practising
+                            </div>
+                          </div>
+                          <div class="sv-panel__section sv-panel__section--primary" id="mini-dashboard-toc-primary">
+                            <div class="sv-panel__section-header">
+                              <div class="sv-panel__section-title">This exercise is from:</div>
+                            </div>
+                            <div class="sv-panel__section-body">
+                              <div class="sv-toc sv-toc--dashboard-mastery-primary">
+                                <ul class="sv-toc__chapters">
+                                  <li class="sv-toc__chapter">
+                                    <div class="sv-toc__chapter-header">
+                                      <div class="sv-toc__chapter-title"><span id="chapter-mastery-title">'.$questionapi->practice->chapter->title.'</span></div>
+                                      <div class="sv-toc__chapter-mastery">
+                                        <div class="sv-toc__section-mastery">
+                                          <progress class="progress" id="chapter-mastery" value="'.round($questionapi->practice->chapter->mastery).'" max="100" data-text="'.round($questionapi->practice->chapter->mastery).'%"></progress>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="sv-toc__chapter-body">
+                                      <ul class="sv-toc__sections">
+                                          <li class="sv-toc__section ">
+                                            <div class="sv-toc__section-header">
+                                              <div class="sv-toc__section-title">
+                                                <span id="section-mastery-title">'.$questionapi->practice->section->title.'</span>
+                                              </div>
+                                              <div class="sv-toc__section-mastery">
+                                                <progress class="progress" id="section-mastery" value="'.round($questionapi->practice->section->mastery).'" max="100" data-text="'.round($questionapi->practice->section->mastery).'%"></progress><br>
+                                              </div>
+                                            </div>
+                                          </li>
+                                      </ul>
+                                    </div>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </main>';
+                    
+                  $result = $PAGE->requires->js_call_amd('filter_siyavula/externalpractice', 'init', [$baseurl,$token,$external_token,$activityid,$responseid]);
+
+                 break;
             }
         }
         

@@ -1,6 +1,4 @@
 <?php
-header('Access-Control-Allow-Origin: *');
-header("Access-Control-Allow-Headers: *");
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir.'/adminlib.php');
 
@@ -154,6 +152,7 @@ function siyavula_debug_message($name_function, $api_route, $payload, $response,
     
     $client_ip = $_SERVER['REMOTE_ADDR'];
     $payload_array = json_decode($payload);
+    $errors = '';
 
     $payloadname         = 'Name :'.$payload_array->name;
     $payloadpassword     = 'Password : '.$payload_array->password;
@@ -266,6 +265,7 @@ function validate_params($data){
 
 function saved_data($data){
     global $PAGE;
+    
     $newdata = (array)$data;
     unset($newdata['section']);
     unset($newdata['action']);
@@ -276,7 +276,6 @@ function saved_data($data){
         $name = str_replace('s_filter_siyavula_','',$name);
         set_config($name,$value,'filter_siyavula');
     }
-    
 }
 
 function get_list_users($siyavula_config,$token){
@@ -328,10 +327,6 @@ function test_get_external_user_token($siyavula_config, $client_ip, $token, $ema
     
     $name = __FUNCTION__;
 
-    if(($siyavula_config->debug_enabled == 1 || $CFG->debugdisplay == 1) && $USER->id != 0){
-        siyavula_debug_message( $name, $api_route, $payload, $response, $httpcode);
-    }
-    
     curl_close($curl);
 
     if(isset($response->errors)){
@@ -339,4 +334,66 @@ function test_get_external_user_token($siyavula_config, $client_ip, $token, $ema
     }else{
         return $response;
     }
+}
+
+
+function get_activity_standalone($questionid, $token, $external_token, $baseurl, $randomseed){
+    global $USER, $CFG;
+
+    $data = array(
+        'template_id' => $questionid, 
+        'randomSeed'  => $randomseed, 
+    );
+    
+    $payload = json_encode($data);
+
+    $curl = curl_init();
+    
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => $baseurl.'api/siyavula/v1/activity/create/standalone',
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 0,
+      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_POSTFIELDS => $payload,
+      CURLOPT_HTTPHEADER => array('JWT: ' .$token, 'Authorization: JWT ' .$external_token),
+    ));
+   
+    $response = curl_exec($curl);
+    $response = json_decode($response);
+    
+    curl_close($curl);
+
+    return $response;
+}
+
+function get_activity_practice($questionid, $token, $external_token, $baseurl){
+    global $USER, $CFG;
+
+    
+    $payload = json_encode($data);
+
+    $curl = curl_init();
+    
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => $baseurl.'api/siyavula/v1/activity/create/practice/'.$questionid.'',
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 0,
+      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_HTTPHEADER => array('JWT: ' .$token, 'Authorization: JWT ' .$external_token),
+    ));
+   
+    $response = curl_exec($curl);
+    $response = json_decode($response);
+    
+    curl_close($curl);
+
+    return $response;
 }
