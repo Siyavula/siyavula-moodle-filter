@@ -37,6 +37,10 @@ $settings->add(new admin_setting_configselect('filter_siyavula/client_curriculum
         get_string('siyavula_curriculum', 'filter_siyavula'),
         get_string('siyavula_curriculum_desc', 'filter_siyavula'), 'INTL', $options));
         
+
+$settings->add(new admin_setting_configcheckbox('filter_siyavula/mathjax', get_string('siyavula_mathjax', 'filter_siyavula'),
+           get_string('siyavula_mathjax', 'filter_siyavula'), 1));
+        
         
 $options = array(
                 '0' => get_string('disabled_debugging','filter_siyavula'),

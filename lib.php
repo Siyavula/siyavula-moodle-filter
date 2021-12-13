@@ -397,3 +397,111 @@ function get_activity_practice($questionid, $token, $external_token, $baseurl){
 
     return $response;
 }
+
+function get_html_question_standalone($questionapi,$activityid,$responseid){
+    global $CFG;
+    
+    //Enabled mathjax loader 
+    $siyavula_config = get_config('filter_siyavula');
+    
+    if($siyavula_config->mathjax == 1){
+       $to_render  = '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
+    }
+   
+    $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
+    $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
+    $to_render .= '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
+    
+    $to_render .= '<main class="sv-region-main emas sv">
+                        <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
+                          <div class="question-wrapper">
+                            <div class="question-content" data-response="'.$responseid.'" id="'.$activityid.'">
+                            '.$questionapi.'
+                            </div>
+                          </div>
+                        </div>
+                    </main>';
+                    
+    return $to_render;
+}
+
+
+function get_html_question_practice($questionapi, $questionchaptertitle,$questionchaptermastery,$questionsectiontitle,$questionmastery){
+    global $CFG;
+    
+    //Enabled mathjax loader 
+    $siyavula_config = get_config('filter_siyavula');
+   
+    if($siyavula_config->mathjax == 1){
+       $to_render  = '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
+    }
+    
+    $to_render_pr .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
+    $to_render_pr .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
+    $to_render_pr .= '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
+    
+    $to_render_pr .= '<main class="sv-region-main emas sv practice-section-question">
+                      <div class="item-psq question">
+                        <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
+                          <div class="question-wrapper">
+                            <div class="question-content">
+                            '.$questionapi.'
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="item-psq">
+                        
+                        <div class="sv-panel-wrapper sv-panel-wrapper--toc">
+                        <div class="sv-panel sv-panel--dashboard sv-panel--toc sv-panel--toc-modern no-secondary-section">
+                          <div class="sv-panel__header">
+                            <div class="sv-panel__title">
+                              Busy practising
+                            </div>
+                          </div>
+                          <div class="sv-panel__section sv-panel__section--primary" id="mini-dashboard-toc-primary">
+                            <div class="sv-panel__section-header">
+                              <div class="sv-panel__section-title">This exercise is from:</div>
+                            </div>
+                            <div class="sv-panel__section-body">
+                              <div class="sv-toc sv-toc--dashboard-mastery-primary">
+                                <ul class="sv-toc__chapters">
+                                  <li class="sv-toc__chapter">
+                                    <div class="sv-toc__chapter-header">
+                                      <div class="sv-toc__chapter-title"><span id="chapter-mastery-title">'.$questionchaptertitle.'</span></div>
+                                      <div class="sv-toc__chapter-mastery">
+                                        <div class="sv-toc__section-mastery">
+                                          <progress class="progress" id="chapter-mastery" value="'.round($questionchaptermastery).'" max="100" data-text="'.round($questionchaptermastery).'%"></progress>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <div class="sv-toc__chapter-body">
+                                      <ul class="sv-toc__sections">
+                                          <li class="sv-toc__section ">
+                                            <div class="sv-toc__section-header">
+                                              <div class="sv-toc__section-title">
+                                                <span id="section-mastery-title">'.$questionsectiontitle.'</span>
+                                              </div>
+                                              <div class="sv-toc__section-mastery">
+                                                <progress class="progress" id="section-mastery" value="'.round($questionmastery).'" max="100" data-text="'.round($questionmastery).'%"></progress><br>
+                                              </div>
+                                            </div>
+                                          </li>
+                                      </ul>
+                                    </div>
+                                  </li>
+                                </ul>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </main>';
+                    
+    return $to_render_pr;
+}
+
+
+
+
+
