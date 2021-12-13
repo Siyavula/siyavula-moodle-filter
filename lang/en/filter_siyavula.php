@@ -41,3 +41,4 @@ $string['client_ip'] = 'Client IP:';
 $string['theme'] = 'Theme:';
 $string['enabled_debugging'] = 'Enabled';
 $string['disabled_debugging'] = 'Disabled';
+$string['siyavula_mathjax'] = 'Enabled MathJax';
