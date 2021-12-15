@@ -42,3 +42,5 @@ $string['theme'] = 'Theme:';
 $string['enabled_debugging'] = 'Enabled';
 $string['disabled_debugging'] = 'Disabled';
 $string['siyavula_mathjax'] = 'Enabled MathJax';
+$string['randomseed'] = 'Random seed / Question ID';
+$string['randomseed_desc'] = 'Use this setting to indicate a "seed" that will be used by the Siyavula API; this setting will be automatically generated if it is not specified.';
