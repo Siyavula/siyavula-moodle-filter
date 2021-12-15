@@ -404,6 +404,8 @@ function get_html_question_standalone($questionapi,$activityid,$responseid){
     //Enabled mathjax loader 
     $siyavula_config = get_config('filter_siyavula');
     
+    $mathjax = get_config('filter_mathjaxloader ');
+    
     if($siyavula_config->mathjax == 1){
        $to_render  = '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
     }
@@ -432,6 +434,7 @@ function get_html_question_practice($questionapi, $questionchaptertitle,$questio
     //Enabled mathjax loader 
     $siyavula_config = get_config('filter_siyavula');
    
+    
     if($siyavula_config->mathjax == 1){
        $to_render  = '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
     }

@@ -29,21 +29,9 @@ class filter_siyavula extends moodle_text_filter
 
         global $OUTPUT, $USER, $PAGE, $CFG, $DB;
         
-        //Verify if user not authenticated
-        $user_auth = false;
-        if (isguestuser() || $USER == NULL)
-        {
-            $user_auth = true;
-            header('Location: ' . $CFG->wwwroot . '/login/index.php');
-            exit();
-        }
-        
-        $client_ip       = $_SERVER['REMOTE_ADDR'];
-        $siyavula_config = get_config('filter_siyavula');
-
-        $token = siyavula_get_user_token($siyavula_config, $client_ip);
-       
-        $user_token = siyavula_get_external_user_token($siyavula_config, $client_ip, $token);
+        /**********************/
+        // I want to validate if the current paragraph contains the
+        // pattern that indicates that the question should be rendered
         
         $qtpractice = false; 
         $syquestion = false;
@@ -62,8 +50,28 @@ class filter_siyavula extends moodle_text_filter
         }
         else if ($pospr != false)
         {
-            $qtpractice = true; 
+            $qtpractice = true;
+        }else{
+            return $text; // we'll return the text with no changes
         }
+        
+        /**********************/
+        
+        //Verify if user not authenticated
+        $user_auth = false;
+        if (isguestuser() || $USER == NULL)
+        {
+            $user_auth = true;
+            header('Location: ' . $CFG->wwwroot . '/login/index.php');
+            exit();
+        }
+        
+        $client_ip       = $_SERVER['REMOTE_ADDR'];
+        $siyavula_config = get_config('filter_siyavula');
+
+        $token = siyavula_get_user_token($siyavula_config, $client_ip);
+       
+        $user_token = siyavula_get_external_user_token($siyavula_config, $client_ip, $token);
         
         //Get user inside in quiz attempt
         $url = $_SERVER["REQUEST_URI"];
@@ -73,10 +81,11 @@ class filter_siyavula extends moodle_text_filter
         //Get type siyavulaqt
         $compare_scale_clause = $DB->sql_compare_text('questiontext')  . ' = ' . $DB->sql_compare_text(':type');
         $typename = $DB->get_record_sql("select * from {question} where $compare_scale_clause",array('type' => $text));
-        
+
         //Question type standalone
-        if (!$user_auth && $syquestion && $pos === false)
+        if ($syquestion && $pos === false)
         {
+ 
             $newtext = strip_tags($text);
             
             $global_ids = [];
@@ -124,11 +133,12 @@ class filter_siyavula extends moodle_text_filter
               $external_token = $user_token->token;
               $activityType = 'standalone';
               $template_id  = $siyavula_activity_id;
-              $randomseed = '3527';
+              $randomseed = $siyavula_config->randomseed;
               $baseurl = $siyavula_config->url_base;
               $currenturl = $PAGE->URL;
               
               $questionapi = get_activity_standalone($siyavula_activity_id,$token, $user_token->token,$siyavula_config->url_base,3527);
+
               $activityid  = $questionapi->activity->id;
               $responseid  = $questionapi->response->id;
     
