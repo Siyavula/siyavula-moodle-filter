@@ -23,7 +23,6 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                                 }
                             }]);
                             submitresponse[0].done(function (response) {
-                                
                                 var dataresponse = JSON.parse(response.response);
                                 var html = dataresponse.response.question_html
                                 let timest = Math.floor(Date.now() / 1000);
@@ -101,6 +100,7 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                     })
                     
                     $("p:contains('sy-')").css("display", "none");
+                    $("#qt")[0].nextSibling.remove()
                     
                     function checkQuestion(){
                         var id    =  activityid;

@@ -342,7 +342,7 @@ function get_activity_standalone($questionid, $token, $external_token, $baseurl,
 
     $data = array(
         'template_id' => $questionid, 
-        'randomSeed'  => $randomseed, 
+        'random_seed'  => $randomseed, 
     );
     
     $payload = json_encode($data);
@@ -423,7 +423,36 @@ function get_html_question_standalone($questionapi,$activityid,$responseid){
                           </div>
                         </div>
                     </main>';
-                    
+    return $to_render;
+}
+
+function get_html_question_standalone_sequencial($questionapi,$activityid,$responseid){
+    global $CFG;
+    
+    //Enabled mathjax loader 
+    $siyavula_config = get_config('filter_siyavula');
+    
+    $mathjax = get_config('filter_mathjaxloader ');
+    
+    if($siyavula_config->mathjax == 1){
+       $to_render  = '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
+    }
+   
+    $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
+    $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
+    $to_render .= '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
+    
+    $to_render .= '<main class="sv-region-main emas sv">
+                        <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
+                          <div class="question-wrapper">
+                            <div class="question-content" data-response="'.$responseid.'" id="'.$activityid.'">
+                            '.$questionapi.'
+                            </div>
+                          </div>
+                        </div>
+                    </main>
+                    <a href="" id="a_next"><button>Next Question</button></a>
+                    <div id="qt"></div>';
     return $to_render;
 }
 

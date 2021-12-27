@@ -15,10 +15,6 @@ $settings->add(new admin_setting_configpasswordunmask('filter_siyavula/client_pa
         get_string('siyavula_client_password', 'filter_siyavula'),
         get_string('siyavula_client_password_desc', 'filter_siyavula'), ' ', PARAM_NOTAGS));
         
-$settings->add(new admin_setting_configtext('filter_siyavula/randomseed',
-        get_string('randomseed', 'filter_siyavula'),
-        get_string('randomseed_desc', 'filter_siyavula'), rand(1, 99999), PARAM_NOTAGS));
-        
 $options = array(
                 'ZA' => 'ZA - South Africa',
                 'NG' => 'NG - Nigeria',
