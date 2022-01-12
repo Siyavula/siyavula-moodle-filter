@@ -30,6 +30,11 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                                 $(`#${targetid}.question-content`).html(html);    
                                 $(`div#${targetid} .toggle-solution-checkbox`).css("visibility", "hidden");
                                 
+                                const retry = document.querySelector('a[name="retry"]')
+                                if(retry){
+                                  retry.setAttribute('href',location.href+(location.href.includes('?')?'&':'?')+'changeseed=true')  
+                                }
+                                
                                 const theId = targetid;
                                 const escapeID = CSS.escape(theId)
    
@@ -69,8 +74,8 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                                     }
                                     labelSolution.append(newShowSpan);
                                     labelSolution.append(newHideSpan);
-                                    
-                                    $(`div#${targetid} #nav-buttons`).css("display","none")
+
+                                    $(`div#${targetid} .sv-button--goto-question`).css("display","none")
                                     
                                     const spanShow = labelSolution.querySelector("span#show");
                                     const spanHide = labelSolution.querySelector("span#hide");

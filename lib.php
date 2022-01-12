@@ -370,9 +370,13 @@ function get_activity_standalone($questionid, $token, $external_token, $baseurl,
     return $response;
 }
 
-function get_activity_practice($questionid, $token, $external_token, $baseurl){
+function get_activity_practice($questionid, $token, $external_token, $baseurl, $randomseed){
     global $USER, $CFG;
 
+    $data = array(
+        'template_id' => $questionid, 
+        'random_seed'  => $randomseed, 
+    );
     
     $payload = json_encode($data);
 
@@ -387,6 +391,7 @@ function get_activity_practice($questionid, $token, $external_token, $baseurl){
       CURLOPT_FOLLOWLOCATION => true,
       CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
       CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_POSTFIELDS => $payload,
       CURLOPT_HTTPHEADER => array('JWT: ' .$token, 'Authorization: JWT ' .$external_token),
     ));
    

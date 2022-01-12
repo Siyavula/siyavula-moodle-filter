@@ -25,7 +25,7 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                             var html = dataresponse.response.question_html
                             $('.question-content').html(html);    
                             $('.toggle-solution-checkbox').css("display", "none");
-                            $('#nav-buttons').css("display","none")
+                            $('#nav-buttons .sv-button--goto-question').css("display","none")
                             $(".toggle-solution-checkbox").attr("data-show",false);
                             var feedback = $(".response-query-body").find(".feedback--incorrect");
                             
