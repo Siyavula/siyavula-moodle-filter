@@ -1,6 +1,5 @@
 <?php
 require_once ($CFG->dirroot . '/filter/siyavula/lib.php');
-require_once($CFG->dirroot.'/question/type/siyavulaqt/lib.php');
 
 class filter_siyavula extends moodle_text_filter
 {
