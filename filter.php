@@ -70,6 +70,8 @@ class filter_siyavula extends moodle_text_filter
         $siyavula_config = get_config('filter_siyavula');
 
         $token = siyavula_get_user_token($siyavula_config, $client_ip);
+        
+        $show_btn_retry = $siyavula_config->showretry;
        
         $user_token = siyavula_get_external_user_token($siyavula_config, $client_ip, $token);
         
@@ -163,7 +165,7 @@ class filter_siyavula extends moodle_text_filter
                 $htmlquestion = get_html_question_standalone($questionapi->response->question_html,$activityid,$responseid);
                 
                 echo str_replace($text_to_replace_render, $htmlquestion, $text);
-                $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$idsq,$currenturl->__toString(),$next_id,$siyavula_activity_id]);
+                $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$idsq,$currenturl->__toString(),$next_id,$siyavula_activity_id, $show_btn_retry]);
               
             }
             else if($is_secuencial == true && $with_text == false) { // Is secuencial, show the "Next" Button
@@ -213,7 +215,7 @@ class filter_siyavula extends moodle_text_filter
         
                   $htmlquestion = get_html_question_standalone_sequencial($questionapi->response->question_html,$activityid,$responseid);
                   echo str_replace($siyavula_activity_id, $htmlquestion, $text);
-                  $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$final_idqt,$currenturl->__toString(),$next_id,$siyavula_activity_id]);
+                  $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$final_idqt,$currenturl->__toString(),$next_id,$siyavula_activity_id, $show_btn_retry]);
               
               }else{
                 
@@ -244,7 +246,7 @@ class filter_siyavula extends moodle_text_filter
             
                       $htmlquestion = get_html_question_standalone_sequencial($questionapi->response->question_html,$activityid,$responseid);
                       echo str_replace($gid, $htmlquestion, $text);
-                      $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$final_idqt,$currenturl->__toString(),$next_id,$siyavula_activity_id]);
+                      $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$final_idqt,$currenturl->__toString(),$next_id,$siyavula_activity_id, $show_btn_retry]);
                      
                       break;
                   }
@@ -291,7 +293,7 @@ class filter_siyavula extends moodle_text_filter
                 $to_echo = str_replace($ttrr, $htmlquestion, $to_echo);
               }
               echo $to_echo;
-              $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$idsq,$currenturl->__toString(),$next_id,$siyavula_activity_id]);
+              $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$idsq,$currenturl->__toString(),$next_id,$siyavula_activity_id, $show_btn_retry]);
             }
   
         }
@@ -329,7 +331,7 @@ class filter_siyavula extends moodle_text_filter
               
               $htmlpractice = get_html_question_practice($questionapi->response->question_html,$questionapi->practice->chapter->title,$questionapi->practice->chapter->mastery,$questionapi->practice->section->title,$questionapi->practice->section->mastery);
               echo $htmlpractice;
-              $result = $PAGE->requires->js_call_amd('filter_siyavula/externalpractice', 'init', [$baseurl,$token,$external_token,$activityid,$responseid]);
+              $result = $PAGE->requires->js_call_amd('filter_siyavula/externalpractice', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$show_btn_retry]);
 
                 break;
             }

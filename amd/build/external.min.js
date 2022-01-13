@@ -1,9 +1,9 @@
 define(['jquery','core/ajax'], function ($,Ajax) {
           return {
-            init: function(baseurl,token,external_token,activityid,responseid,idsq,currenturl,next_id,$siyavula_activity_id) {
+            init: function(baseurl,token,external_token,activityid,responseid,idsq,currenturl,next_id,$siyavula_activity_id,show_retry_btn) {
            
                 $(document).ready(function () {
-                    
+                    show_retry_btn = parseInt(show_retry_btn)
                     $('.question-content').on('click',function(e){
                         const response = e.currentTarget.dataset.response
                         const targetid = e.currentTarget.id
@@ -32,7 +32,13 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                                 
                                 const retry = document.querySelector('a[name="retry"]')
                                 if(retry){
-                                  retry.setAttribute('href',location.href+(location.href.includes('?')?'&':'?')+'changeseed=true')  
+                                  retry.setAttribute('href',location.href+(location.href.includes('?')?'&':'?')+'changeseed=true');
+                                  console.log('show_retry_btn: ', show_retry_btn)
+                                  if(!show_retry_btn) {
+                                      // Hide the btn
+                                      console.log('hide');
+                                      retry.style.display = 'none';
+                                  }
                                 }
                                 
                                 const theId = targetid;
@@ -105,7 +111,9 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                     })
                     
                     $("p:contains('sy-')").css("display", "none");
-                    $("#qt")[0].nextSibling.remove()
+                    if($("#qt")[0]) {
+                        $("#qt")[0].nextSibling.remove()
+                    }
                     
                     function checkQuestion(){
                         var id    =  activityid;
