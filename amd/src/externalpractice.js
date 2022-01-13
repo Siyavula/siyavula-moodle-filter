@@ -1,8 +1,9 @@
 define(['jquery','core/ajax'], function ($,Ajax) {
           return {
-            init: function(baseurl,token,external_token,activityid,responseid) {
+            init: function(baseurl,token,external_token,activityid,responseid,show_retry_btn) {
            
                 $(document).ready(function () {
+                    show_retry_btn = parseInt(show_retry_btn)
                     $("p:contains('syp-')").css("display", "none");
                     
                     $(document).on('click','.sv-button.sv-button--primary.check-answer-button',function(e){
@@ -27,6 +28,18 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                             $('.toggle-solution-checkbox').css("display", "none");
                             $('#nav-buttons .sv-button--goto-question').css("display","none")
                             $(".toggle-solution-checkbox").attr("data-show",false);
+                            
+                            const retry = document.querySelector('a[name="retry"]')
+                            if(retry){
+                              retry.setAttribute('href',location.href+(location.href.includes('?')?'&':'?')+'changeseed=true');
+                              console.log('show_retry_btn: ', show_retry_btn)
+                              if(!show_retry_btn) {
+                                  // Hide the btn
+                                  console.log('hide');
+                                  retry.style.display = 'none';
+                              }
+                            }
+                            
                             var feedback = $(".response-query-body").find(".feedback--incorrect");
                             
                             if(feedback.length === 1){

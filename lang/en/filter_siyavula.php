@@ -45,3 +45,4 @@ $string['siyavula_mathjax'] = 'Enabled MathJax';
 $string['randomseed'] = 'Random seed / Question ID';
 $string['randomseed_desc'] = 'Use this setting to indicate a "seed" that will be used by the Siyavula API; this setting will be automatically generated if it is not specified.';
 $string['modulenameplural'] = 'Siyavula';
+$string['siyavula_showretry'] = 'Show "Try Again" button';

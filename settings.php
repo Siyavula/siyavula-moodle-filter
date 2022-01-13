@@ -41,6 +41,9 @@ $settings->add(new admin_setting_configselect('filter_siyavula/client_curriculum
 $settings->add(new admin_setting_configcheckbox('filter_siyavula/mathjax', get_string('siyavula_mathjax', 'filter_siyavula'),
            get_string('siyavula_mathjax', 'filter_siyavula'), 1));
         
+$settings->add(new admin_setting_configcheckbox('filter_siyavula/showretry', get_string('siyavula_showretry', 'filter_siyavula'),
+           get_string('siyavula_showretry', 'filter_siyavula'), 0));
+        
         
 $options = array(
                 '0' => get_string('disabled_debugging','filter_siyavula'),
