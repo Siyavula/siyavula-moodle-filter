@@ -295,10 +295,14 @@ function get_list_users($siyavula_config,$token){
     ));
 
     $response = curl_exec($curl);
+    
     $response = json_decode($response);
     
+    //Limit response list users generated with token...
+    $limit_result = array_slice($response, 0, 30);
+    
     curl_close($curl);
-    return $response;
+    return $limit_result;
 }
 
 function test_get_external_user_token($siyavula_config, $client_ip, $token, $email){
