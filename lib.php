@@ -1,7 +1,10 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir.'/adminlib.php');
-
+/*
+function update_settings_filter_siyavula($a) {
+        
+}*/
 
 function siyavula_get_user_token($siyavula_config, $client_ip){
     global $USER, $PAGE, $CFG;
@@ -279,7 +282,6 @@ function saved_data($data){
 }
 
 function get_list_users($siyavula_config,$token){
-
     $curl = curl_init();
 
     curl_setopt_array($curl, array(
@@ -422,6 +424,12 @@ function get_html_question_standalone($questionapi,$activityid,$responseid){
     $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
     $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
     $to_render .= '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
+    
+    $to_render .= '<script> 
+    function show_hide_solution(){
+                    
+                    }
+    </script>';
     
     $to_render .= '<main class="sv-region-main emas sv">
                         <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
