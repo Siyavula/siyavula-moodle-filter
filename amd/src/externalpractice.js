@@ -4,70 +4,123 @@ define(['jquery','core/ajax'], function ($,Ajax) {
            
                 $(document).ready(function () {
                     show_retry_btn = parseInt(show_retry_btn)
-                    $("p:contains('syp-')").css("display", "none");
-                    
-                    $(document).on('click','.sv-button.sv-button--primary.check-answer-button',function(e){
-                        e.preventDefault();
-                        var formData = $('form[name="questions"]').serialize()
-                        var submitresponse = Ajax.call(
-                        [{ 
-                            methodname: 'filter_siyavula_submit_answers_siyavula', 
-                            args: { 
-                                baseurl: baseurl,
-                                token: token,
-                                external_token: external_token,
-                                activityid: activityid,
-                                responseid: responseid,
-                                data:  formData,
-                            }
-                        }]);
-                        submitresponse[0].done(function (response) {
-                            var dataresponse = JSON.parse(response.response);
-                            var html = dataresponse.response.question_html
-                            $('.question-content').html(html);    
-                            $('.toggle-solution-checkbox').css("display", "none");
-                            $('#nav-buttons .sv-button--goto-question').css("display","none")
-                            $(".toggle-solution-checkbox").attr("data-show",false);
-                            
-                            const retry = document.querySelector('a[name="retry"]')
-                            if(retry){
-                              retry.setAttribute('href',location.href+(location.href.includes('?')?'&':'?')+'changeseed=true');
-                              console.log('show_retry_btn: ', show_retry_btn)
-                              if(!show_retry_btn) {
-                                  // Hide the btn
-                                  console.log('hide');
-                                  retry.style.display = 'none';
-                              }
-                            }
-                            
-                            var feedback = $(".response-query-body").find(".feedback--incorrect");
-                            
-                            if(feedback.length === 1){
-                                $("span:contains('Show the full solution')").css("display", "none");
-                                var show = $("span:contains('Show the full solution')").css('display').toLowerCase() == 'none'
-                            }else{
-                                $("span:contains('Hide the full solution')").css("display", "none");
-                            }
-                            
-                            $('.toggle-solution-checkbox').on('click',function(e){
-                                const eventhide = e.target.attributes.id.value
+                    $('.question-content').on('click',function(e){
+                        const response = e.currentTarget.dataset.response
+                        const targetid = e.currentTarget.id
+                        if(e.target.className === 'sv-button sv-button--primary check-answer-button'){
+                            e.preventDefault();
+                            var formData = $(`div#${targetid} form[name="questions"]`).serialize()
+                            var submitresponse = Ajax.call(
+                            [{ 
+                                methodname: 'filter_siyavula_submit_answers_siyavula', 
+                                args: { 
+                                    baseurl: baseurl,
+                                    token: token,
+                                    external_token: external_token,
+                                    activityid: activityid,
+                                    responseid: responseid,
+                                    data:  formData,
+                                }
+                            }]);
+                            submitresponse[0].done(function (response) {
+                                //delete(window.MathJax); // This is for load the correct symbols of MathJAx/Latex in the html response answer
+                                var dataresponse = JSON.parse(response.response);
+                                var html = dataresponse.response.question_html
+                                let timest = Math.floor(Date.now() / 1000);
+                                html = html.replaceAll('sv-button toggle-solution', `sv-button toggle-solution btnsolution-${targetid}-${timest}`);
+                                $(`#${targetid}.question-content`).html(html);    
+                                $(`div#${targetid} .toggle-solution-checkbox`).css("visibility", "hidden");
                                 
-                                if (show === true){
-                                     $(`label[for="${eventhide}"]>span:contains('Show the full solution')`).css("display", "block");
-                                     $(`label[for="${eventhide}"]>span:contains('Hide the full solution')`).css("display", "none");
-                                     show = false
-                                }else{
-                                     $(`label[for="${eventhide}"]>span:contains('Show the full solution')`).css("display", "none");
-                                     $(`label[for="${eventhide}"]>span:contains('Hide the full solution')`).css("display", "block");
-                                     show = true
-                                } 
-                                $(`label[for="${eventhide}"]+.response-solution`).slideToggle();
+                                const retry = document.querySelector('a[name="retry"]')
+                                if(retry){
+                                  retry.setAttribute('href',location.href+(location.href.includes('?')?'&':'?')+'changeseed=true');
+                                  console.log('show_retry_btn: ', show_retry_btn)
+                                  if(!show_retry_btn) {
+                                      // Hide the btn
+                                      console.log('hide');
+                                      retry.style.display = 'none';
+                                  }
+                                }
+                                
+                                const theId = targetid;
+                                console.log(theId)
+                                const escapeID = CSS.escape(theId)
+   
+                                const labelsSolution = document.querySelectorAll(`#${escapeID}.question-content #show-hide-solution`);
+                                console.log(labelsSolution);
+
+                                labelsSolution.forEach((labelSolution, key) => {
+                                    
+                                    labelSolution.innerHTML = '';
+     
+                                    const newShowSpan = document.createElement('input')
+                                    newShowSpan.classList.add('sv-button');
+                                    newShowSpan.value = ('Show the full solution');
+                                    newShowSpan.type = 'button';
+                                    newShowSpan.id = `show${key}`;
+                                    
+                                    const newHideSpan = document.createElement('input')
+                                    newHideSpan.value = ('Hide the full solution');
+                                    newHideSpan.classList.add('sv-button');
+                                    newHideSpan.type = 'button';
+                                    newHideSpan.id = `hide${key}`;
+                                    
+                                    var is_correct = true;
+                                    const rsElement = labelSolution.nextSibling // Response information
+                                    const identificador = `${rsElement.id}-${key}`;
+                                    rsElement.classList.add(identificador);
+                                    console.log(rsElement);
+                                    if(rsElement.id == 'correct-solution') {
+                                        is_correct = true;
+                                    }
+                                    else {
+                                        is_correct = false;
+                                    }
+                                     
+                                    if(is_correct == false){
+                                        //$(`div#${targetid} span:contains('Show the full solution')`).css("display", "none");
+                                        newShowSpan.style.display = 'none';
+                                    }else{
+                                        //$(`div#${targetid} span:contains('Hide the full solution')`).css("display", "none");
+                                        newHideSpan.style.display = 'none';
+                                    }
+                                    labelSolution.append(newShowSpan);
+                                    labelSolution.append(newHideSpan);
+
+                                    $(`div#${targetid} .sv-button--goto-question`).css("display","none")
+                                    
+                                    const spanShow = labelSolution.querySelector(`#show${key}`);
+                                    const spanHide = labelSolution.querySelector(`#hide${key}`);
+                                    const functionClickSolution = btnE => {
+                                        const currentSpan = btnE.target;
+                                        if(currentSpan.value.includes('Show')) {
+                                            spanShow.style.display = 'none';
+                                            spanHide.style.display = 'initial';
+                                        }
+                                        else {
+                                            spanShow.style.display = 'initial';
+                                            spanHide.style.display = 'none';
+                                        }
+                                        
+                                        $(`.${identificador}`).slideToggle();
+                                        
+                                    }
+                                    spanShow.addEventListener('click', functionClickSolution);
+                                    spanHide.addEventListener('click', functionClickSolution);
+                                });
+
+                            }).fail(function (ex) {
+                                console.log(ex);
                             });
-            
-                        }).fail(function (ex) {
-                            console.log(ex);
-                        });
-                    });
+                        }
+                        
+                    })
+                    
+                    $("p:contains('sy-')").css("display", "none");
+                    if($("#qt")[0]) {
+                        $("#qt")[0].nextSibling.remove()
+                    }
+                
                 });
             }
         };

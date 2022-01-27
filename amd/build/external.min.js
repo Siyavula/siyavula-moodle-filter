@@ -23,6 +23,7 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                                 }
                             }]);
                             submitresponse[0].done(function (response) {
+                                delete(window.MathJax); // This is for load the correct symbols of MathJAx/Latex in the html response answer
                                 var dataresponse = JSON.parse(response.response);
                                 var html = dataresponse.response.question_html
                                 let timest = Math.floor(Date.now() / 1000);
@@ -42,28 +43,33 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                                 }
                                 
                                 const theId = targetid;
+                                console.log(theId)
                                 const escapeID = CSS.escape(theId)
    
-                                const labelsSolution = document.querySelectorAll(`#${escapeID}.question-content .btnsolution-${escapeID}-${timest}`);
+                                const labelsSolution = document.querySelectorAll(`#${escapeID}.question-content #show-hide-solution`);
+                                console.log(labelsSolution);
 
-                                labelsSolution.forEach(labelSolution => {
+                                labelsSolution.forEach((labelSolution, key) => {
+                                    
                                     labelSolution.innerHTML = '';
-                                    var btntarget = labelSolution.getAttribute('for')
-                                    const currentTargeId = btntarget.replace('toggle-', '');
      
-                                    const newShowSpan = document.createElement('span')
-                                    newShowSpan.append('Show the full solution');
-                                    newShowSpan.id = 'show';
+                                    const newShowSpan = document.createElement('input')
+                                    newShowSpan.classList.add('sv-button');
+                                    newShowSpan.value = ('Show the full solution');
+                                    newShowSpan.type = 'button';
+                                    newShowSpan.id = `show${key}`;
                                     
-                                    const newHideSpan = document.createElement('span')
-                                    newHideSpan.append('Hide the full solution');
-                                    newHideSpan.id = 'hide';
+                                    const newHideSpan = document.createElement('input')
+                                    newHideSpan.value = ('Hide the full solution');
+                                    newHideSpan.classList.add('sv-button');
+                                    newHideSpan.type = 'button';
+                                    newHideSpan.id = `hide${key}`;
                                     
-                                    const response_solution = document.querySelectorAll(`#${escapeID}.question-content .response-solution`);
-
                                     var is_correct = true;
-                                    const rsElement = response_solution[currentTargeId]
-
+                                    const rsElement = labelSolution.nextSibling // Response information
+                                    const identificador = `${rsElement.id}-${key}`;
+                                    rsElement.classList.add(identificador);
+                                    console.log(rsElement);
                                     if(rsElement.id == 'correct-solution') {
                                         is_correct = true;
                                     }
@@ -83,25 +89,25 @@ define(['jquery','core/ajax'], function ($,Ajax) {
 
                                     $(`div#${targetid} .sv-button--goto-question`).css("display","none")
                                     
-                                    const spanShow = labelSolution.querySelector("span#show");
-                                    const spanHide = labelSolution.querySelector("span#hide");
+                                    const spanShow = labelSolution.querySelector(`#show${key}`);
+                                    const spanHide = labelSolution.querySelector(`#hide${key}`);
                                     const functionClickSolution = btnE => {
                                         const currentSpan = btnE.target;
-                                        if(currentSpan.innerHTML.includes('Show')) {
+                                        if(currentSpan.value.includes('Show')) {
                                             spanShow.style.display = 'none';
-                                            spanHide.style.display = 'inherit';
+                                            spanHide.style.display = 'initial';
                                         }
                                         else {
-                                            spanShow.style.display = 'inherit';
+                                            spanShow.style.display = 'initial';
                                             spanHide.style.display = 'none';
                                         }
                                         
-                                        $(`div#${targetid} label[for="${btntarget}"]+.response-solution`).slideToggle();
+                                        $(`.${identificador}`).slideToggle();
                                         
                                     }
                                     spanShow.addEventListener('click', functionClickSolution);
                                     spanHide.addEventListener('click', functionClickSolution);
-                                })
+                                });
 
                             }).fail(function (ex) {
                                 console.log(ex);
@@ -130,6 +136,8 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                         }
                     }
                     checkQuestion()
+                    
+                   
                 });
             }
         };
