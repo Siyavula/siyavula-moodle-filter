@@ -404,6 +404,14 @@ function get_activity_practice($questionid, $token, $external_token, $baseurl, $
     $response = curl_exec($curl);
     $response = json_decode($response);
     
+    $question_html = $response->response->question_html;
+    $new_question_html = '';
+    $new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?id=2&config=TeX-MML-AM_HTMLorMML-full"></script>'; // Para cargar el MathJax
+
+    $new_question_html .= $question_html;
+        
+    $response->response->question_html = $new_question_html;
+    
     curl_close($curl);
 
     return $response;
@@ -479,7 +487,6 @@ function get_html_question_practice($questionapi, $questionchaptertitle,$questio
     
     //Enabled mathjax loader 
     $siyavula_config = get_config('filter_siyavula');
-   
     
     if($siyavula_config->mathjax == 1){
        $to_render  = '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
