@@ -23,7 +23,7 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                                 }
                             }]);
                             submitresponse[0].done(function (response) {
-                                //delete(window.MathJax); // This is for load the correct symbols of MathJAx/Latex in the html response answer
+                                delete(window.MathJax); // This is for load the correct symbols of MathJAx/Latex in the html response answer
                                 var dataresponse = JSON.parse(response.response);
                                 var html = dataresponse.response.question_html
                                 let timest = Math.floor(Date.now() / 1000);
