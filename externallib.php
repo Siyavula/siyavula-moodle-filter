@@ -45,8 +45,8 @@ class filter_siyavula_external extends external_api {
         $question_html = $response->response->question_html;
         $new_question_html = '';
         $new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?id=2&config=TeX-MML-AM_HTMLorMML-full"></script>'; // Para cargar el MathJax
+        $new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/jax/output/HTML-CSS/fonts/TeX/fontdata.js?V=2.7.5"></script>';
         //$new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/config/TeX-MML-AM_HTMLorMML-full.js?V=2.7.5"></script>';
-        //$new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/jax/output/HTML-CSS/fonts/TeX/fontdata.js?V=2.7.5"></script>';
         $new_question_html .= $question_html;
         
         $response->response->question_html = $new_question_html;
