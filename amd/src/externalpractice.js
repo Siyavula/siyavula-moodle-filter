@@ -23,13 +23,6 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                                 }
                             }]);
                             submitresponse[0].done(function (response) {
-                                const fixMathJax = document.querySelector('script[type="text/x-mathjax-config;executed=true"]') || document.querySelector('script[type="text/x-mathjax-config"]');
-                                console.log('fixMathJax', fixMathJax)
-                                if(fixMathJax) {
-                                    // Delete the MathJax.hub.Config for correct mathjax translate
-                                    fixMathJax.innerHTML = '';
-                                }
-                                delete(window.MathJax); // This is for load the correct symbols of MathJAx/Latex in the html response answer
                                 var dataresponse = JSON.parse(response.response);
                                 var html = dataresponse.response.question_html
                                 let timest = Math.floor(Date.now() / 1000);
@@ -114,6 +107,9 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                                     spanShow.addEventListener('click', functionClickSolution);
                                     spanHide.addEventListener('click', functionClickSolution);
                                 });
+                                
+                                MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+
 
                             }).fail(function (ex) {
                                 console.log(ex);
