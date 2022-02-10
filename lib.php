@@ -418,26 +418,25 @@ function get_activity_practice($questionid, $token, $external_token, $baseurl, $
 }
 
 function get_html_question_standalone($questionapi,$activityid,$responseid){
-    global $CFG;
+    global $CFG, $DB;
     
     //Enabled mathjax loader 
     $siyavula_config = get_config('filter_siyavula');
-    
-    $mathjax = get_config('filter_mathjaxloader ');
-    
+
     if($siyavula_config->mathjax == 1){
        $to_render  = '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
+    }
+  
+    $getmathjax = $DB->get_record('filter_active', array('filter' => 'mathjaxloader'));
+    if($getmathjax->active == 1){
+      $mathjax_moodle = get_config('filter_mathjaxloader');
+      $mathjax_moodle->httpsurl = '';
+      $mathjax_moodle->mathjaxconfig = '';
     }
    
     $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
     $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
     $to_render .= '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
-    
-    $to_render .= '<script> 
-    function show_hide_solution(){
-                    
-                    }
-    </script>';
     
     $to_render .= '<main class="sv-region-main emas sv">
                         <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
@@ -452,15 +451,20 @@ function get_html_question_standalone($questionapi,$activityid,$responseid){
 }
 
 function get_html_question_standalone_sequencial($questionapi,$activityid,$responseid){
-    global $CFG;
+    global $CFG, $DB;
     
     //Enabled mathjax loader 
     $siyavula_config = get_config('filter_siyavula');
     
-    $mathjax = get_config('filter_mathjaxloader ');
-    
     if($siyavula_config->mathjax == 1){
        $to_render  = '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
+    }
+    
+    $getmathjax = $DB->get_record('filter_active', array('filter' => 'mathjaxloader'));
+    if($getmathjax->active == 1){
+      $mathjax_moodle = get_config('filter_mathjaxloader');
+      $mathjax_moodle->httpsurl = '';
+      $mathjax_moodle->mathjaxconfig = '';
     }
    
     $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
@@ -483,13 +487,20 @@ function get_html_question_standalone_sequencial($questionapi,$activityid,$respo
 
 
 function get_html_question_practice($questionapi, $questionchaptertitle,$questionchaptermastery,$questionsectiontitle,$questionmastery){
-    global $CFG;
+    global $CFG, $DB;
     
     //Enabled mathjax loader 
     $siyavula_config = get_config('filter_siyavula');
     
     if($siyavula_config->mathjax == 1){
        $to_render  = '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
+    }
+    
+    $getmathjax = $DB->get_record('filter_active', array('filter' => 'mathjaxloader'));
+    if($getmathjax->active == 1){
+      $mathjax_moodle = get_config('filter_mathjaxloader');
+      $mathjax_moodle->httpsurl = '';
+      $mathjax_moodle->mathjaxconfig = '';
     }
     
     $to_render_pr .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
