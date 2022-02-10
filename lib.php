@@ -41,7 +41,7 @@ function siyavula_get_user_token($siyavula_config, $client_ip){
     $response = json_decode($response);
 
     $name = __FUNCTION__;
-
+    
     if(($siyavula_config->debug_enabled == 1 || $CFG->debugdisplay == 1) && $USER->id != 0){
         siyavula_debug_message( $name, $api_route, $payload, $response, $httpcode);
     }
@@ -153,6 +153,7 @@ function siyavula_debug_message($name_function, $api_route, $payload, $response,
   
     global $CFG;
     
+    $id = optional_param('section', '', PARAM_TEXT);
     $client_ip = $_SERVER['REMOTE_ADDR'];
     $payload_array = json_decode($payload);
     $errors = '';
@@ -180,8 +181,9 @@ function siyavula_debug_message($name_function, $api_route, $payload, $response,
     }else if($httpcode == 0){
         $errors = get_string('client_header','filter_siyavula');
     }
- 
-   if($siyavula_config->debug_enabled == 1 || $CFG->debugdisplay == 1){
+  
+   if($id == 'filtersettingsiyavula'){
+      if($siyavula_config->debug_enabled == 1 || $CFG->debugdisplay == 1){
             $print_debuginfo = '<div class="alert alert-danger" role="alert">
                              <span><strong>'.get_string('info_filter', 'filter_siyavula').'</strong></span>'.$message.' <br>
                             '.$function.'<br>
@@ -210,7 +212,9 @@ function siyavula_debug_message($name_function, $api_route, $payload, $response,
         
         echo $print_debuginfo;
         echo $print_token;
-    }
+      }
+   }
+  
     
     /*error_reporting(E_ALL); // NOT FOR PRODUCTION SERVERS!
     @ini_set('display_errors', '1');    // NOT FOR PRODUCTION SERVERS!
