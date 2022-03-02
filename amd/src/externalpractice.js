@@ -85,8 +85,6 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                                     }
                                     labelSolution.append(newShowSpan);
                                     labelSolution.append(newHideSpan);
-
-                                    $(`div#${targetid} .sv-button--goto-question`).css("display","none")
                                     
                                     const spanShow = labelSolution.querySelector(`#show${key}`);
                                     const spanHide = labelSolution.querySelector(`#hide${key}`);
