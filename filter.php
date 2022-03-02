@@ -83,7 +83,7 @@ class filter_siyavula extends moodle_text_filter
         //Get type siyavulaqt
         $compare_scale_clause = $DB->sql_compare_text('questiontext')  . ' = ' . $DB->sql_compare_text(':type');
         $typename = $DB->get_record_sql("select * from {question} where $compare_scale_clause",array('type' => $text));
-        
+        $explode_delimiter = '|';
         //Question type standalone
         if ($syquestion && $pos === false)
         {
@@ -93,7 +93,7 @@ class filter_siyavula extends moodle_text_filter
         
             $re = '/\[{2}[sy\-\d{1,},?|]*\]{2}/m';
             preg_match_all($re, $newtext, $matches);
-
+            
             //Verify format only sy-
             if(empty($matches[0])){
                 $textclear = str_replace(['sy-'], '', $newtext);
@@ -103,21 +103,22 @@ class filter_siyavula extends moodle_text_filter
             }else{
                 if(count($matches[0]) == 1) { // Only found one
                     $is_secuencial = true;
+                    $newtext = str_replace($matches[0][0],'',$text);   
                     // Is secuencial
                     $ids = str_replace(['[[', ']]', 'sy-'], '', $matches[0][0]);
                     $ids = explode(',', $ids);
-                  
-                    if(count($ids) > 1) {
+  
+                    if(count($ids) > 1 /*&& count($newtext) == 0*/) {
                         // If explode give more than one
                         $global_ids = array_merge($global_ids, $ids); // Then is secuencial, show Next button
                         $with_text = false; // Is secuencial with not text
                     }
                     else {
-                    //Only one question, no more
-                    $text_to_replace_render = $matches[0][0];
-                    
-                    $with_text = true; // If only one, maybe have text too
-                  }
+                        $explode_delimiter = ',';
+                        //Only one question, no more
+                        $text_to_replace_render = $matches[0][0];
+                        $with_text = true; // If only one, maybe have text too
+                    }
                 }
                 else { // Multiple Questions with texts
                   $is_secuencial = false;
@@ -131,12 +132,13 @@ class filter_siyavula extends moodle_text_filter
             $all_ids = $global_ids;
             
             if($is_secuencial == true && $with_text == true)  // At least, one question with text too
-            {
+            { 
+   
                 $next_id = false; // No put the Next button
                 $siyavula_activity_id = str_replace(['[[', ']]', 'sy-'], '', $text_to_replace_render); // Only the number
-                
                 // If we detext a "," then we will use [0] for the question ID, and [1] for the seed 
                 $siyavula_activity_id = explode('|', $siyavula_activity_id);
+                
                 
                 if(isset($siyavula_activity_id[1])){
                     $seed = (int) $siyavula_activity_id[1];
@@ -162,23 +164,22 @@ class filter_siyavula extends moodle_text_filter
                 $activityid  = $questionapi->activity->id;
                 $responseid  = $questionapi->response->id;
                 
-                $htmlquestion = get_html_question_standalone($questionapi->response->question_html,$activityid,$responseid);
-                
+                $htmlquestion = get_html_question_standalone($questionapi->response->question_html,$activityid,$responseid);  
                 echo str_replace($text_to_replace_render, $htmlquestion, $text);
                 $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$idsq,$currenturl->__toString(),$next_id,$siyavula_activity_id, $show_btn_retry]);
-              
             }
             else if($is_secuencial == true && $with_text == false) { // Is secuencial, show the "Next" Button
               // Check query
-             
+              if(count($newtext) == 0) {
+                  // The text is present
+              }
               $sid = optional_param('templateId', false, PARAM_RAW);
               $param_all_id = optional_param('all_ids', false, PARAM_RAW);
               $sectionId = optional_param('sectionid', false, PARAM_RAW);
               $currenturl = $PAGE->URL;
               if ($param_all_id)
               {
-
-                  $all_ids = explode('|', $param_all_id);
+                  $all_ids = explode(',', $param_all_id);
                   $first_id = $all_ids[0];
                   
                   // If we detext a "," then we will use [0] for the question ID, and [1] for the seed 
@@ -199,11 +200,11 @@ class filter_siyavula extends moodle_text_filter
                   $template_id  = $siyavula_activity_id;
                   $baseurl = $siyavula_config->url_base;
                   
-                  $idsq = implode('|', $all_ids);
-                  $param_seed = explode("|", $idsq);
+                  $idsq = implode(',', $all_ids);
+                  $param_seed = explode("|", $siyavula_activity_id);
                   $seed = array_pop($param_seed);
                   
-                  $final_idqt = implode('|', $param_seed);
+                  $final_idqt = $idsq;//implode('|', $param_seed);
                  
                   $external_token = $user_token->token;
                   $randomseed = (isset($seed) ? $seed : rand(1, 99999));
@@ -212,21 +213,26 @@ class filter_siyavula extends moodle_text_filter
                   $questionapi = get_activity_standalone($siyavula_activity_id,$token, $user_token->token,$siyavula_config->url_base,$randomseed);
                   $activityid  = $questionapi->activity->id;
                   $responseid  = $questionapi->response->id;
-        
+                  
+                  if(!empty($questionapi->errors[0])){
+                    $errormsg = $questionapi->errors[0]->code.' - '.$questionapi->errors[0]->message;
+                    echo($errormsg);
+                  }
+                 
                   $htmlquestion = get_html_question_standalone_sequencial($questionapi->response->question_html,$activityid,$responseid);
-                  echo str_replace($siyavula_activity_id, $htmlquestion, $text);
+                        $text = str_replace($matches[0][0],'{{paste_q_here}}',$text); 
+                        
+                  echo str_replace('{{paste_q_here}}', $htmlquestion, $text);
                   $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$final_idqt,$currenturl->__toString(),$next_id,$siyavula_activity_id, $show_btn_retry]);
               
               }else{
-                
                   foreach ($global_ids as $gid)
                   {
                       $siyavula_activity_id = $gid;
 
                       $next_id = $this->check_if_next($global_ids, $siyavula_activity_id);
-
-                      $idsq = implode('|', $all_ids);
-                      $param_seed = explode("|", $idsq);
+                      $idsq = implode(',', $all_ids);
+                      $param_seed = explode("|", $gid);
                       $seed = array_pop($param_seed);
                       
                       $retry = optional_param('changeseed',false,PARAM_BOOL);
@@ -234,7 +240,7 @@ class filter_siyavula extends moodle_text_filter
                         $seed = rand(1, 99999);
                       }
                       
-                      $final_idqt = implode('|', $param_seed);
+                      $final_idqt = $idsq;//implode(',', $param_seed);
                      
                       $external_token = $user_token->token;
                       $randomseed = (isset($seed) ? $seed : rand(1, 99999));
@@ -243,10 +249,12 @@ class filter_siyavula extends moodle_text_filter
                       $questionapi = get_activity_standalone($siyavula_activity_id,$token, $user_token->token,$siyavula_config->url_base,$randomseed);
                       $activityid  = $questionapi->activity->id;
                       $responseid  = $questionapi->response->id;
-            
                       $htmlquestion = get_html_question_standalone_sequencial($questionapi->response->question_html,$activityid,$responseid);
-                      echo str_replace($gid, $htmlquestion, $text);
-                      $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$final_idqt,$currenturl->__toString(),$next_id,$siyavula_activity_id, $show_btn_retry]);
+                        $text = str_replace($matches[0][0],'{{paste_q_here}}',$text); 
+                        echo str_replace('{{paste_q_here}}', $htmlquestion, $text);
+                        $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [
+                        $baseurl,$token,$external_token,$activityid,$responseid,$final_idqt,$currenturl->__toString(),$next_id,$siyavula_activity_id, $show_btn_retry
+                        ]);
                      
                       break;
                   }

@@ -118,11 +118,6 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                         
                     })
                     
-                    $("p:contains('sy-')").css("display", "none");
-                    if($("#qt")[0]) {
-                        $("#qt")[0].nextSibling.remove()
-                    }
-                    
                     function checkQuestion(){
                         var id    =  activityid;
                         var param =  idsq;
