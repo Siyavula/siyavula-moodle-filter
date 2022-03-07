@@ -1,6 +1,6 @@
 define(['jquery','core/ajax'], function ($,Ajax) {
           return {
-            init: function(baseurl,token,external_token,activityid,responseid,show_retry_btn) {
+            init: function(baseurl,token,external_token,activityid,responseid,show_retry_btn,idqt,seedqt) {
            
                 $(document).ready(function () {
                     show_retry_btn = parseInt(show_retry_btn)
@@ -32,7 +32,7 @@ define(['jquery','core/ajax'], function ($,Ajax) {
                                 
                                 const retry = document.querySelector('a[name="retry"]')
                                 if(retry){
-                                  retry.setAttribute('href',location.href+(location.href.includes('?')?'&':'?')+'changeseed=true');
+                                  retry.setAttribute('href',location.href+(location.href.includes('?')?'&':'?')+'changeseed=true'+'&'+'template_id='+idqt+'&'+'random_seed='+seedqt);
                                   console.log('show_retry_btn: ', show_retry_btn)
                                   if(!show_retry_btn) {
                                       // Hide the btn
