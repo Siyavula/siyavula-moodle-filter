@@ -349,7 +349,7 @@ function test_get_external_user_token($siyavula_config, $client_ip, $token, $ema
 
 function get_activity_standalone($questionid, $token, $external_token, $baseurl, $randomseed){
     global $USER, $CFG;
-
+    
     $data = array(
         'template_id' => $questionid, 
         'random_seed'  => $randomseed, 
@@ -374,7 +374,7 @@ function get_activity_standalone($questionid, $token, $external_token, $baseurl,
    
     $response = curl_exec($curl);
     $response = json_decode($response);
-    
+
     curl_close($curl);
 
     return $response;
@@ -384,12 +384,12 @@ function get_activity_practice($questionid, $token, $external_token, $baseurl, $
     global $USER, $CFG;
 
     $data = array(
-        'template_id' => $questionid, 
+        'template_id' => intval($questionid), 
         'random_seed'  => $randomseed, 
     );
     
     $payload = json_encode($data);
-
+    
     $curl = curl_init();
     
     curl_setopt_array($curl, array(
@@ -407,7 +407,7 @@ function get_activity_practice($questionid, $token, $external_token, $baseurl, $
    
     $response = curl_exec($curl);
     $response = json_decode($response);
-    
+
     $question_html = $response->response->question_html;
     $new_question_html = '';
     $new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?id=2&config=TeX-MML-AM_HTMLorMML-full"></script>'; // Para cargar el MathJax
@@ -451,6 +451,7 @@ function get_html_question_standalone($questionapi,$activityid,$responseid){
                           </div>
                         </div>
                     </main>';
+     
     return $to_render;
 }
 
