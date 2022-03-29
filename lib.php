@@ -47,7 +47,10 @@ function siyavula_get_user_token($siyavula_config, $client_ip){
     }
     
     curl_close($curl);
-    return $response->token;
+    if(isset($response->token)){
+       return $response->token;
+    }
+    
 }
 
 function siyavula_get_external_user_token($siyavula_config, $client_ip, $token, $userid = 0){
@@ -155,16 +158,40 @@ function siyavula_debug_message($name_function, $api_route, $payload, $response,
     
     $id = optional_param('section', '', PARAM_TEXT);
     $client_ip = $_SERVER['REMOTE_ADDR'];
-    $payload_array = json_decode($payload);
+    $payload_array = json_decode($payload,true);
     $errors = '';
-
-    $payloadname         = 'Name :'.$payload_array->name;
-    $payloadpassword     = 'Password : '.$payload_array->password;
-    $payloadregion       = 'Region : '.$payload_array->region;
-    $payloadcurriculum   = 'Curriculum : '.$payload_array->curriculum;
-    $payloadip           = 'Client ip : '.$payload_array->client_ip;
-    $payloadtheme        = 'Theme : '.$payload_array->theme;
     
+    $payloadname = '';
+    $payloadpassword = '';
+    $payloadregion = '';
+    $payloadcurriculum = '';
+    $payloadip = '';
+    $payloadtheme = '';
+    
+    if(isset($payload_array['name'])){
+      $payloadname         = 'Name :'.$payload_array['name'];
+    }
+    
+    if(isset($payload_array['password'])){
+      $payloadpassword     = 'Password : '.$payload_array['password'];
+    }
+    
+    if(isset($payload_array['region'])){
+      $payloadregion       = 'Region : '.$payload_array['region'];
+    }
+    
+    if(isset($payload_array['curriculum'])){
+      $payloadcurriculum   = 'Curriculum : '.$payload_array['curriculum'];
+    }
+    
+    if(isset($payload_array['client_ip'])){
+     $payloadip           = 'Client ip : '.$payload_array['client_ip'];
+    }
+    
+    if(isset($payload_array['theme'])){
+     $payloadtheme        = 'Theme : '.$payload_array['theme'];
+    }
+  
     $siyavula_config = get_config('filter_siyavula');
     
     $function            = '<strong>'.get_string('function_name','filter_siyavula').'</strong> '.$name_function;
@@ -305,7 +332,7 @@ function get_list_users($siyavula_config,$token){
     $response = json_decode($response);
     
     //Limit response list users generated with token...
-    $limit_result = array_slice($response, 0, 30);
+    $limit_result = array_slice((array)$response, 0, 30);
     
     curl_close($curl);
     return $limit_result;
@@ -426,18 +453,12 @@ function get_html_question_standalone($questionapi,$activityid,$responseid){
     
     //Enabled mathjax loader 
     $siyavula_config = get_config('filter_siyavula');
+    $to_render = '';
 
     if($siyavula_config->mathjax == 1){
        $to_render  = '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
     }
-  
-    $getmathjax = $DB->get_record('filter_active', array('filter' => 'mathjaxloader'));
-    if($getmathjax->active == 1){
-      $mathjax_moodle = get_config('filter_mathjaxloader');
-      $mathjax_moodle->httpsurl = '';
-      $mathjax_moodle->mathjaxconfig = '';
-    }
-   
+
     $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
     $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
     $to_render .= '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
@@ -458,20 +479,14 @@ function get_html_question_standalone($questionapi,$activityid,$responseid){
 function get_html_question_standalone_sequencial($questionapi,$activityid,$responseid){
     global $CFG, $DB;
     
+    $to_render = '';
     //Enabled mathjax loader 
     $siyavula_config = get_config('filter_siyavula');
     
     if($siyavula_config->mathjax == 1){
        $to_render  = '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
     }
-    
-    $getmathjax = $DB->get_record('filter_active', array('filter' => 'mathjaxloader'));
-    if($getmathjax->active == 1){
-      $mathjax_moodle = get_config('filter_mathjaxloader');
-      $mathjax_moodle->httpsurl = '';
-      $mathjax_moodle->mathjaxconfig = '';
-    }
-   
+
     $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
     $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
     $to_render .= '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
@@ -494,18 +509,12 @@ function get_html_question_standalone_sequencial($questionapi,$activityid,$respo
 function get_html_question_practice($questionapi, $questionchaptertitle,$questionchaptermastery,$questionsectiontitle,$questionmastery){
     global $CFG, $DB;
     
+    $to_render_pr = '';
     //Enabled mathjax loader 
     $siyavula_config = get_config('filter_siyavula');
     
     if($siyavula_config->mathjax == 1){
        $to_render  = '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>';
-    }
-    
-    $getmathjax = $DB->get_record('filter_active', array('filter' => 'mathjaxloader'));
-    if($getmathjax->active == 1){
-      $mathjax_moodle = get_config('filter_mathjaxloader');
-      $mathjax_moodle->httpsurl = '';
-      $mathjax_moodle->mathjaxconfig = '';
     }
     
     $to_render_pr .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
@@ -573,6 +582,39 @@ function get_html_question_practice($questionapi, $questionchaptertitle,$questio
     return $to_render_pr;
 }
 
+//Html render practice session
+function retry_question_html_practice($activityid, $responseid, $token, $external_token, $baseurl){
+    global $USER, $CFG;
+
+    $curl = curl_init();
+    
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => $baseurl.'api/siyavula/v1/activity/'.$activityid.'/response/'.$responseid.'/retry',
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 0,
+      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_HTTPHEADER => array('JWT: ' .$token, 'Authorization: JWT ' .$external_token),
+    ));
+   
+    $response = curl_exec($curl);
+    $response = json_decode($response);
+
+    $question_html = $response->response->question_html;
+    $new_question_html = '';
+    $new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?id=2&config=TeX-MML-AM_HTMLorMML-full"></script>'; // Para cargar el MathJax
+
+    $new_question_html .= $question_html;
+        
+    $response->response->question_html = $new_question_html;
+
+    curl_close($curl);
+
+    return $response;
+}
 
 
 
