@@ -79,6 +79,9 @@ class filter_siyavula extends moodle_text_filter
         $url = $_SERVER["REQUEST_URI"];
         $findme  = '/mod/quiz/attempt.php';
         $pos = strpos($url, $findme);
+        $activityid = '';
+        $responseid = '';
+        $apihtml = '';
         
         //Get type siyavulaqt
         $compare_scale_clause = $DB->sql_compare_text('questiontext')  . ' = ' . $DB->sql_compare_text(':type');
@@ -133,7 +136,7 @@ class filter_siyavula extends moodle_text_filter
             
             if($is_secuencial == true && $with_text == true)  // At least, one question with text too
             { 
-   
+     
                 $next_id = false; // No put the Next button
                 $siyavula_activity_id = str_replace(['[[', ']]', 'sy-'], '', $text_to_replace_render); // Only the number
                 // If we detext a "," then we will use [0] for the question ID, and [1] for the seed 
@@ -147,33 +150,44 @@ class filter_siyavula extends moodle_text_filter
                     $siyavula_activity_id = $siyavula_activity_id[0];
                 }
                 
+                $idsq = '';
+                
                 $retry = optional_param('changeseed',false,PARAM_BOOL);
                 if($retry){
                   $seed = rand(1, 99999);
                 }
               
                 $external_token = $user_token->token;
-                $activityType = 'standalone';
                 $template_id  = $siyavula_activity_id;
                 $randomseed = (isset($seed) ? $seed : rand(1, 99999));
                 $baseurl = $siyavula_config->url_base;
                 $currenturl = $PAGE->URL;
                 
                 $questionapi = get_activity_standalone($siyavula_activity_id,$token, $user_token->token,$siyavula_config->url_base,$randomseed);
+
+                if(!empty($questionapi->errors[0])){
+                    $errormsg = $questionapi->errors[0]->code.' - '.$questionapi->errors[0]->message;
+                    echo($errormsg);
+                }
                 
-                $activityid  = $questionapi->activity->id;
-                $responseid  = $questionapi->response->id;
+                if(isset($questionapi->activity->id)){
+                    $activityid  = $questionapi->activity->id;
+                }
                 
-                $htmlquestion = get_html_question_standalone($questionapi->response->question_html,$activityid,$responseid);  
+                if(isset($questionapi->response->id)){
+                    $responseid  = $questionapi->response->id;
+                }
+                
+                if(isset($questionapi->response->question_html)){
+                    $apihtml = $questionapi->response->question_html;
+                }
+                
+                $htmlquestion = get_html_question_standalone($apihtml,$activityid,$responseid);  
                 echo str_replace($text_to_replace_render, $htmlquestion, $text);
                 $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$idsq,$currenturl->__toString(),$next_id,$siyavula_activity_id, $show_btn_retry]);
             }
             else if($is_secuencial == true && $with_text == false) { // Is secuencial, show the "Next" Button
             
-              // Check query
-              if(count($newtext) == 0) {
-                  // The text is present
-              }
               $sid = optional_param('templateId', false, PARAM_RAW);
               $param_all_id = optional_param('all_ids', false, PARAM_RAW);
               $sectionId = optional_param('sectionid', false, PARAM_RAW);
@@ -219,13 +233,13 @@ class filter_siyavula extends moodle_text_filter
                   }
                  
                   $htmlquestion = get_html_question_standalone_sequencial($questionapi->response->question_html,$activityid,$responseid);
-                        $text = str_replace($matches[0][0],'{{paste_q_here}}',$text); 
+                        $text = str_replace($matches[0][0],'{{}}',$text); 
                         
-                  echo str_replace('{{paste_q_here}}', $htmlquestion, $text);
+                  echo str_replace('{{}}', $htmlquestion, $text);
                   $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$final_idqt,$currenturl->__toString(),$next_id,$siyavula_activity_id, $show_btn_retry]);
               
                }else{
-    
+                
                   //Check if questions contain param seed, param seed is used un one or multiple questions
                   $finishids = array();
                   foreach($all_ids as $aid){
@@ -236,26 +250,32 @@ class filter_siyavula extends moodle_text_filter
                         $finishids[] = $check;
                      }
                   }
-                  
+              
                   $idsq = implode(',', $all_ids);
-    
+
                   $findme   = ',';
                   $pos = strpos($idsq, $findme);
                   
                   if($pos){
+                      
                       $indexseed = explode(',',$idsq);
                       foreach($indexseed as $sd){
                          
                          $param_separator =  explode("|", $sd);
-                         
+     
                          $idquestion = $param_separator[0];
                          $randomseed = $param_separator[1];
                          
                          $next_id = $this->check_if_next($finishids, $idquestion);
-                         
+
                          $ids_allnext = implode(',',$finishids);
-                        
+
                          $questionapi = get_activity_standalone($idquestion,$token, $user_token->token,$siyavula_config->url_base,$randomseed);
+                         
+                         if(!empty($questionapi->errors[0])){
+                            $errormsg = $questionapi->errors[0]->code.' - '.$questionapi->errors[0]->message;
+                            echo($errormsg);
+                         }
                          
                          $activityid  = $questionapi->activity->id;
                          $responseid  = $questionapi->response->id;
@@ -264,8 +284,9 @@ class filter_siyavula extends moodle_text_filter
                          
                          $htmlquestion = get_html_question_standalone_sequencial($questionapi->response->question_html,$activityid,$responseid);
                          
-                         $text = str_replace($matches[0][0],'{{paste_q_here}}',$text); 
-                         echo str_replace('{{paste_q_here}}', $htmlquestion, $text);
+                         $text = str_replace($matches[0][0],'{{}}',$text); 
+
+                         echo str_replace('{{}}', $htmlquestion, $text);
                          $result = $PAGE->requires->js_call_amd('filter_siyavula/external', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$ids_allnext,$currenturl->__toString(),$next_id,$idquestion, $show_btn_retry]);
                          break;
                       }
@@ -277,6 +298,7 @@ class filter_siyavula extends moodle_text_filter
               $to_echo = $text;
               foreach($text_to_replace_render as $ttrr)
               {
+                $idsq = '';
                 $next_id = false; // No put the Next button
                 $siyavula_activity_id = str_replace(['[[', ']]', 'sy-'], '', $ttrr); // Only the number
                 
@@ -305,6 +327,12 @@ class filter_siyavula extends moodle_text_filter
                 unset($seed);
                 
                 $questionapi = get_activity_standalone($siyavula_activity_id,$token, $user_token->token,$siyavula_config->url_base,$randomseed);
+                
+                if(!empty($questionapi->errors[0])){
+                    $errormsg = $questionapi->errors[0]->code.' - '.$questionapi->errors[0]->message;
+                    echo($errormsg);
+                }
+                
                 $activityid  = $questionapi->activity->id;
                 $responseid  = $questionapi->response->id;
       
@@ -330,6 +358,7 @@ class filter_siyavula extends moodle_text_filter
             foreach ($matches[0] as $match)
             {
               $siyavula_activity_id = str_replace(['[[', ']]', 'syp-'], '', $match);
+              $baseurl = $siyavula_config->url_base;
               
               // If we detext a "," then we will use [0] for the question ID, and [1] for the seed 
               $siyavula_activity_id = explode('|', $siyavula_activity_id);
@@ -341,35 +370,48 @@ class filter_siyavula extends moodle_text_filter
                   $siyavula_activity_id = $siyavula_activity_id[0];
               }
               
-              $retry     = optional_param('changeseed',false,PARAM_BOOL);
-              $seedretry = optional_param('random_seed',false,PARAM_INT);
-              $idretry =   optional_param('template_id',false,PARAM_INT);
-              if($retry){
-                  $seed = $seedretry;
-                  $siyavula_activity_id = $idretry;
-               }
-  
-              $external_token = $user_token->token;
-              if(isset($seed)){
+              //Check if retry question is send params   
+              $aid        = optional_param('aid', null, PARAM_RAW);
+              $rid        = optional_param('rid', null, PARAM_RAW);
+            if($aid != NULL  && $rid != NUL){
+                $retryhtml = retry_question_html_practice($aid,$rid,$token,$user_token->token,$baseurl);
+                  
+                $questionapi = get_activity_practice_toc($siyavula_activity_id,$token, $user_token->token,$baseurl);
+
+                $activityid  = $retryhtml->activity->id;
+                $responseid  = $retryhtml->response->id;
+                $idqt   = $retryhtml->practice->section->id;
+                $seedqt = $retryhtml->response->random_seed;
+              
+                $htmlpractice = get_html_question_practice($retryhtml->response->question_html,$questionapi->practice->chapter->title,$questionapi->practice->chapter->mastery,$questionapi->practice->section->title,$questionapi->practice->section->mastery);
+                echo $htmlpractice;
+                $PAGE->requires->js_call_amd('filter_siyavula/externalpractice', 'init', [$baseurl,$token,$user_token->token,$activityid,$responseid,$show_btn_retry,$idqt,$seedqt]);
+            }else{
+                $external_token = $user_token->token;
+                if(isset($seed)){
                 $randomseed = $seed;   
-              }else{
-                $randomseed = rand(1, 99999);
-              }
-
-              $baseurl = $siyavula_config->url_base;
+                }else{
+                    $randomseed = rand(1, 99999);
+                }
+    
+                $questionapi = get_activity_practice($siyavula_activity_id,$token, $user_token->token,$baseurl,$randomseed);
               
-              $questionapi = get_activity_practice($siyavula_activity_id,$token, $user_token->token,$siyavula_config->url_base,$randomseed);
+                if(!empty($questionapi->errors[0])){
+                    $errormsg = $questionapi->errors[0]->code.' - '.$questionapi->errors[0]->message;
+                    echo($errormsg);
+                }
           
-              $activityid  = $questionapi->activity->id;
-              $responseid  = $questionapi->response->id;
-              $idqt   = $questionapi->practice->section->id;
-              $seedqt = $questionapi->response->random_seed;
+                $activityid  = $questionapi->activity->id;
+                $responseid  = $questionapi->response->id;
+                $idqt   = $questionapi->practice->section->id;
+                $seedqt = $questionapi->response->random_seed;
               
-              $htmlpractice = get_html_question_practice($questionapi->response->question_html,$questionapi->practice->chapter->title,$questionapi->practice->chapter->mastery,$questionapi->practice->section->title,$questionapi->practice->section->mastery);
-              echo $htmlpractice;
-              $result = $PAGE->requires->js_call_amd('filter_siyavula/externalpractice', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$show_btn_retry,$idqt,$seedqt]);
-
+                $htmlpractice = get_html_question_practice($questionapi->response->question_html,$questionapi->practice->chapter->title,$questionapi->practice->chapter->mastery,$questionapi->practice->section->title,$questionapi->practice->section->mastery);
+                echo $htmlpractice;
+                $result = $PAGE->requires->js_call_amd('filter_siyavula/externalpractice', 'init', [$baseurl,$token,$external_token,$activityid,$responseid,$show_btn_retry,$idqt,$seedqt]);
+    
                 break;
+                }
             }
         }
         

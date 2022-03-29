@@ -2,15 +2,22 @@
 defined('MOODLE_INTERNAL') || die();
 require_once ($CFG->dirroot . '/filter/siyavula/lib.php');
 global $PAGE, $OUTPUT;
-//print_object($PAGE);die;
+
 // Course_module ID, or
 $id = optional_param('section', '', PARAM_TEXT);
+
+ // Settings page.
+$settings = new admin_settingpage('filtersettingsiyavula', new lang_string('filtername', 'filter_siyavula'),
+'moodle/site:config', false);
+
 $url_base = new admin_setting_configtext(
                 'filter_siyavula/url_base', 
                 get_string('siyavula_url_base', 'filter_siyavula'), 
                 get_string('siyavula_url_base_desc', 'filter_siyavula'), 
                 'https://www.siyavula.com/', 
                 PARAM_NOTAGS);
+$token_get = '';
+$list_users = '';
 
 $client_name = new admin_setting_configtext('filter_siyavula/client_name',
         get_string('siyavula_client_name', 'filter_siyavula'),
@@ -68,6 +75,7 @@ if($id == 'filtersettingsiyavula') { // Only if the current page is the filter s
                 $token_get = new admin_setting_description('filter_siyavula/token_get',
                         get_string('siyavula_tokenget', 'filter_siyavula'),
                         $tokenresponse);
+                $settings->add($token_get);
         } 
         
         if(!empty($get_users) && !empty($tokenresponse)){
@@ -79,6 +87,8 @@ if($id == 'filtersettingsiyavula') { // Only if the current page is the filter s
                 $list_users = new admin_setting_configselect('users_filter_siyavula/list_users',
                         get_string('siyavula_list_users', 'filter_siyavula'),
                         $test_token,'' ,$data);
+                
+                $settings->add($list_users);
         }
         
         //Show messages if filter response correct create Token and external toke....
@@ -113,12 +123,6 @@ if ($data = data_submitted() and confirm_sesskey() and isset($data->action) and 
         validate_params($data);
 } 
 
-/*
-
-$url_base->set_updatedcallback(function() {
-        var_dump('test');
-});*/
-
 $settings->add($url_base);
 $settings->add($client_name);
 $settings->add($client_password);
@@ -127,5 +131,3 @@ $settings->add($client_curriculum);
 $settings->add($mathjax);
 $settings->add($showretry);
 $settings->add($debug_enabled);
-$settings->add($token_get);
-$settings->add($list_users); 

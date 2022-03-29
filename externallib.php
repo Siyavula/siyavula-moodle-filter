@@ -51,7 +51,6 @@ class filter_siyavula_external extends external_api {
         
         $response->response->question_html = $new_question_html;
         $response = json_encode($response);
-
         curl_close($curl);
     
         return array('response' => $response);
