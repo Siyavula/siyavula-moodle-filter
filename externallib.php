@@ -4,7 +4,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once("$CFG->libdir/externallib.php");
 
 class filter_siyavula_external extends external_api {
-    
+
     public static function submit_answer_parameters() {
         return new external_function_parameters(
             array(
@@ -17,7 +17,7 @@ class filter_siyavula_external extends external_api {
             )
         );
     }
-    
+
     /**
      * Function get courses in tgas relations, event gallery for webservice.
      * @return external_function_parameters
@@ -25,9 +25,9 @@ class filter_siyavula_external extends external_api {
     public static function submit_answer($baseurl,$token,$external_token,$activityid,$responseid,$data) {
 
         $payload = $data;
-    
+
         $curl = curl_init();
- 
+
         curl_setopt_array($curl, array(
           CURLOPT_URL => $baseurl.'api/siyavula/v1/activity/'.$activityid.'/response/'.$responseid.'/submit-answer',
           CURLOPT_RETURNTRANSFER => true,
@@ -44,18 +44,18 @@ class filter_siyavula_external extends external_api {
         $response = json_decode($response);
         $question_html = $response->response->question_html;
         $new_question_html = '';
-        $new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?id=2&config=TeX-MML-AM_HTMLorMML-full"></script>'; // Para cargar el MathJax
+        // $new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?id=2&config=TeX-MML-AM_HTMLorMML-full"></script>'; // Para cargar el MathJax
         // $new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/jax/output/HTML-CSS/fonts/TeX/fontdata.js?V=2.7.5"></script>';
         //$new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/config/TeX-MML-AM_HTMLorMML-full.js?V=2.7.5"></script>';
         $new_question_html .= $question_html;
-        
+
         $response->response->question_html = $new_question_html;
         $response = json_encode($response);
         curl_close($curl);
-    
+
         return array('response' => $response);
     }
-    
+
     /**
      * Return info data tags and course info
      * @return tag_courses_returns
