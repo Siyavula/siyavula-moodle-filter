@@ -11,32 +11,9 @@ define(["jquery", "core/ajax"], function ($, Ajax) {
       seedqt
     ) {
       $(document).ready(function () {
-        interval();
-        function interval() {
-          const timeAnswer = setInterval(() => {
-            if ($("#check-answer-button").length) {
-              $("#check-answer-button").attr("value", "Check Answer");
-              $("#check-answer-button")
-                .removeClass("check-answer-button")
-                .addClass("verify-answer");
-
-              $(".sv-button.sv-button--primary.verify-answer").on(
-                "click",
-                function (e) {
-                  e.preventDefault();
-                  $(".sv-button.sv-button--primary.verify-answer").after(
-                    "<div class='feedback feedback--repeat'>Are you sure? Take another look at your answer!</div>"
-                  );
-                  $(".sv-button.sv-button--primary.verify-answer").remove();
-                  $(".feedback.feedback--repeat").after(
-                    "<input class='sv-button sv-button--primary check-answer-button' id='check-answer-button' type='submit' value='Final check'>"
-                  );
-                }
-              );
-              clearInterval(timeAnswer);
-            }
-          }, 100);
-        }
+        // Initialise MathJax typesetting
+        var nodes = Y.all(".latex-math");
+        Y.fire(M.core.event.FILTER_CONTENT_UPDATED, { nodes: nodes });
 
         show_retry_btn = parseInt(show_retry_btn);
         $(".question-content").on("click", function (e) {
@@ -67,7 +44,6 @@ define(["jquery", "core/ajax"], function ($, Ajax) {
               ]);
               submitresponse[0]
                 .done(function (response) {
-                  interval();
                   var dataresponse = JSON.parse(response.response);
                   var html = dataresponse.response.question_html;
                   let timest = Math.floor(Date.now() / 1000);
