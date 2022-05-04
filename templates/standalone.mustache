@@ -31,7 +31,6 @@
     </div>
   </div>
 </main>
-<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?config=TeX-MML-AM_HTMLorMML-full"></script>
 <script src="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.js"></script>
 
 <a href='' id='a_next'><button>Next Question</button></a>
@@ -41,21 +40,21 @@
     var id =  '{{ template_id }}';
     var param = '{{ all_ids }}';
     var next =  '{{ next }}';
-    
+
     var btn = document.querySelector('#a_next')
     btn.href = `{{current_url}}?templateId=${id}&all_ids=${param}&show_id=${next}`
-    
+
     if(next == false){
       btn.innerHTML = '';
     }
   }
   checkQuestion()
-  
+
   //Hide buttons controls
   function checkControls(){
-            
+
       var qtvalue = document.getElementsByClassName('sv-button--goto-question')
-      
+
       if(qtvalue.length){
           document.getElementsByClassName('sv-button--goto-question')[0].style.display = "none";
       }else{
