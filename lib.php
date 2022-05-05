@@ -460,7 +460,7 @@ function get_html_question_standalone($questionapi,$activityid,$responseid){
     }
 
     $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
-    $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
+    // $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
     $to_render .= '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
 
     $to_render .= '<main class="sv-region-main emas sv">
@@ -488,7 +488,7 @@ function get_html_question_standalone_sequencial($questionapi,$activityid,$respo
     }
 
     $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
-    $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
+    // $to_render .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
     $to_render .= '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
 
     $to_render .= '<main class="sv-region-main emas sv">
@@ -518,7 +518,7 @@ function get_html_question_practice($questionapi, $questionchaptertitle,$questio
     }
 
     $to_render_pr .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
-    $to_render_pr .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
+    // $to_render_pr .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/question-api/question-api.min.css"/>';
     $to_render_pr .= '<link rel="stylesheet" href="'.$CFG->wwwroot.'/filter/siyavula/styles/general.css"/>';
 
     $to_render_pr .= '<main class="sv-region-main emas sv practice-section-question">
