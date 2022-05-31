@@ -1,3 +1,7 @@
+body, html {
+    width: auto;
+}
+
 .monassis .icon{
     font-family: 'sv-ui-icon';
 }
