@@ -1,10 +1,6 @@
 <?php
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/adminlib.php');
-/*
-function update_settings_filter_siyavula($a) {
-
-}*/
 
 function siyavula_get_user_token($siyavulaconfig, $clientip) {
     global $USER, $PAGE, $CFG;
@@ -56,7 +52,7 @@ function siyavula_get_external_user_token($siyavulaconfig, $clientip, $token, $u
 
     $curl = curl_init();
 
-    // Check verify user exitis in siyav
+    // Check verify user exists.
     if ($userid == 0) {
         $email = $USER->email;
     } else {
@@ -238,11 +234,6 @@ function siyavula_debug_message($namefunction, $apiroute, $payload, $response, $
             echo $printtoken;
         }
     }
-
-    /*error_reporting(E_ALL); // NOT FOR PRODUCTION SERVERS!
-    @ini_set('display_errors', '1');    // NOT FOR PRODUCTION SERVERS!
-    $CFG->debug = (E_ALL | E_STRICT);   // === DEBUG_DEVELOPER - NOT FOR PRODUCTION SERVERS!
-    $CFG->debugdisplay = 1;            // NOT FOR PRODUCTION SERVERS!*/
 }
 
 function validate_params($data) {
@@ -442,7 +433,7 @@ function get_activity_practice($questionid, $token, $externaltoken, $baseurl, $r
 function get_html_question_standalone($questionapi, $activityid, $responseid) {
     global $CFG, $DB;
 
-    // Enabled mathjax loader
+    // Enabled mathjax loader.
     $siyavulaconfig = get_config('filter_siyavula');
     $torender = '';
 
@@ -466,7 +457,7 @@ function get_html_question_standalone_sequencial($questionapi, $activityid, $res
     global $CFG, $DB;
 
     $torender = '';
-    // Enabled mathjax loader
+    // Enabled mathjax loader.
     $siyavulaconfig = get_config('filter_siyavula');
 
     $torender .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
@@ -487,11 +478,12 @@ function get_html_question_standalone_sequencial($questionapi, $activityid, $res
 }
 
 
-function get_html_question_practice($questionapi, $questionchaptertitle, $questionchaptermastery, $questionsectiontitle, $questionmastery) {
+function get_html_question_practice($questionapi, $questionchaptertitle, $questionchaptermastery,
+  $questionsectiontitle, $questionmastery) {
     global $CFG, $DB;
 
     $torenderpr = '';
-    // Enabled mathjax loader
+    // Enabled mathjax loader.
     $siyavulaconfig = get_config('filter_siyavula');
 
     $torenderpr .= '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
@@ -558,7 +550,7 @@ function get_html_question_practice($questionapi, $questionchaptertitle, $questi
     return $torenderpr;
 }
 
-// Html render practice session
+// Html render practice session.
 function retry_question_html_practice($activityid, $responseid, $token, $externaltoken, $baseurl) {
     global $USER, $CFG;
 
