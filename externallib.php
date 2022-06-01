@@ -3,11 +3,10 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/externallib.php");
 
-class filter_siyavula_external extends external_api
-{
+class filter_siyavula_external extends external_api {
 
-    public static function submit_answer_parameters()
-    {
+
+    public static function submit_answer_parameters() {
         return new external_function_parameters(
             array(
                 'baseurl'            => new external_value(PARAM_URL, 'Url base siyavula'),
@@ -24,8 +23,7 @@ class filter_siyavula_external extends external_api
      * Function get courses in tgas relations, event gallery for webservice.
      * @return external_function_parameters
      */
-    public static function submit_answer($baseurl, $token, $external_token, $activityid, $responseid, $data)
-    {
+    public static function submit_answer($baseurl, $token, $externaltoken, $activityid, $responseid, $data) {
 
         $payload = $data;
 
@@ -41,18 +39,18 @@ class filter_siyavula_external extends external_api
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => "POST",
             CURLOPT_POSTFIELDS => $payload,
-            CURLOPT_HTTPHEADER => array('JWT: ' . $token, 'Authorization: JWT ' . $external_token),
+            CURLOPT_HTTPHEADER => array('JWT: ' . $token, 'Authorization: JWT ' . $externaltoken),
         ));
         $response = curl_exec($curl);
         $response = json_decode($response);
-        $question_html = $response->response->question_html;
-        $new_question_html = '';
+        $questionhtml = $response->response->question_html;
+        $newquestionhtml = '';
         // $new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/MathJax.js?id=2&config=TeX-MML-AM_HTMLorMML-full"></script>'; // Para cargar el MathJax
         // $new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/jax/output/HTML-CSS/fonts/TeX/fontdata.js?V=2.7.5"></script>';
-        //$new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/config/TeX-MML-AM_HTMLorMML-full.js?V=2.7.5"></script>';
-        $new_question_html .= $question_html;
+        // $new_question_html .= '<script src="https://www.siyavula.com/static/themes/emas/node_modules/mathjax/config/TeX-MML-AM_HTMLorMML-full.js?V=2.7.5"></script>';
+        $newquestionhtml .= $questionhtml;
 
-        $response->response->question_html = $new_question_html;
+        $response->response->question_html = $newquestionhtml;
         $response = json_encode($response);
         curl_close($curl);
 
@@ -63,8 +61,7 @@ class filter_siyavula_external extends external_api
      * Return info data tags and course info
      * @return tag_courses_returns
      */
-    public static function submit_answer_returns()
-    {
+    public static function submit_answer_returns() {
         return new external_single_structure(
             array(
                 'response' => new external_value(PARAM_RAW, '')

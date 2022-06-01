@@ -22,18 +22,18 @@ $html .= '<form action="' . $CFG->wwwroot . '/filter/siyavula/test_external_user
 if ($_SERVER['REQUEST_METHOD'] == "POST" and isset($_POST['testToken'])) {
     $email = ($_POST['email']);
 
-    $client_ip       = $_SERVER['REMOTE_ADDR'];
-    $siyavula_config = get_config('filter_siyavula');
+    $clientip       = $_SERVER['REMOTE_ADDR'];
+    $siyavulaconfig = get_config('filter_siyavula');
 
-    $external_token = test_get_external_user_token($siyavula_config, $client_ip, $token, $email);
+    $externaltoken = test_get_external_user_token($siyavulaconfig, $clientip, $token, $email);
 
-    if (isset($external_token->token)) {
+    if (isset($externaltoken->token)) {
         $html .= '<div class="alert alert-success" role="alert">
-                      ' . get_string('token_externalgenerated', 'filter_siyavula') . ' ' . $external_token->token . '
+                      ' . get_string('token_externalgenerated', 'filter_siyavula') . ' ' . $externaltoken->token . '
                    </div>';
     } else {
         $html .= '<div class="alert alert-danger" role="alert">
-                      ' . get_string('error', 'filter_siyavula') . ' ' . $external_token->errors[0]->code . ' ' . $external_token->errors[0]->message . '
+                      ' . get_string('error', 'filter_siyavula') . ' ' . $externaltoken->errors[0]->code . ' ' . $externaltoken->errors[0]->message . '
                    </div>';
     }
 }
