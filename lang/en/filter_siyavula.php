@@ -1,5 +1,5 @@
 <?php
- 
+
 $string['filtername'] = 'Siyavula Content';
 $string['siyavula_client_password'] = 'Password';
 $string['siyavula_client_name'] = 'Username';
