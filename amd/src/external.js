@@ -65,22 +65,19 @@ define(["jquery", "core/ajax"], function ($, Ajax) {
                       (location.href.includes("?") ? "&" : "?") +
                       "changeseed=true"
                   );
-                  console.log("show_retry_btn: ", show_retry_btn);
+
                   if (!show_retry_btn) {
                     // Hide the btn
-                    console.log("hide");
                     retry.style.display = "none";
                   }
                 }
 
                 const theId = targetid;
-                console.log(theId);
                 const escapeID = CSS.escape(theId);
 
                 const labelsSolution = document.querySelectorAll(
                   `#${escapeID}.question-content #show-hide-solution`
                 );
-                console.log(labelsSolution);
 
                 labelsSolution.forEach((labelSolution, key) => {
                   labelSolution.innerHTML = "";
@@ -101,7 +98,6 @@ define(["jquery", "core/ajax"], function ($, Ajax) {
                   const rsElement = labelSolution.nextSibling; // Response information
                   const identificador = `${rsElement.id}-${key}`;
                   rsElement.classList.add(identificador);
-                  console.log(rsElement);
                   if (rsElement.id == "correct-solution") {
                     is_correct = true;
                   } else {
@@ -109,10 +105,8 @@ define(["jquery", "core/ajax"], function ($, Ajax) {
                   }
 
                   if (is_correct == false) {
-                    //$(`div#${targetid} span:contains('Show the full solution')`).css("display", "none");
                     newShowSpan.style.display = "none";
                   } else {
-                    //$(`div#${targetid} span:contains('Hide the full solution')`).css("display", "none");
                     newHideSpan.style.display = "none";
                   }
                   labelSolution.append(newShowSpan);
