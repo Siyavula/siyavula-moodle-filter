@@ -368,7 +368,7 @@ class filter_siyavula extends moodle_text_filter {
                 if ($aid != null  && $rid != NUL) {
                     $retryhtml = retry_question_html_practice($aid, $rid, $token, $usertoken->token, $baseurl);
 
-                    $questionapi = get_activity_practice_toc($siyavulaactivityid, $token, $usertoken->token, $baseurl);
+                    $questionapi = get_activity_practice($siyavulaactivityid, $token, $usertoken->token, $baseurl, $randomseed);
 
                     $activityid  = $retryhtml->activity->id;
                     $responseid  = $retryhtml->response->id;
@@ -381,6 +381,7 @@ class filter_siyavula extends moodle_text_filter {
                         $questionapi->practice->section->title,
                         $questionapi->practice->section->mastery);
                     echo $htmlpractice;
+
                     $PAGE->requires->js_call_amd('filter_siyavula/externalpractice', 'init',
                         [$baseurl, $token, $usertoken->token, $activityid, $responseid,
                         $showbtnretry, $idqt, $seedqt]);
@@ -411,6 +412,7 @@ class filter_siyavula extends moodle_text_filter {
                         $questionapi->practice->section->title,
                         $questionapi->practice->section->mastery);
                     echo $htmlpractice;
+
                     $result = $PAGE->requires->js_call_amd('filter_siyavula/externalpractice',
                         'init', [$baseurl, $token, $externaltoken, $activityid, $responseid,
                         $showbtnretry, $idqt, $seedqt]);

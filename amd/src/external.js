@@ -28,7 +28,7 @@ define(["jquery", "core/ajax"], function ($, Ajax) {
 
         function submitResponse() {
           // Get all Siyavula inputs that have not been marked "readonly"
-          var formData = $(".response-query-input")
+          var formData = $(".response-query input, .response-query select")
             .not('[name*="|readonly"]')
             .serialize();
 
