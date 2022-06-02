@@ -1,23 +1,23 @@
 define(["jquery", "core/ajax"], function ($, Ajax) {
   return {
     init: function (
-      baseurl,
+      baseUrl,
       token,
-      external_token,
-      activityid,
-      responseid,
-      idsq,
-      currenturl,
-      next_id,
-      $siyavula_activity_id,
-      show_retry_btn
+      externalToken,
+      activityId,
+      responseId,
+      idSq,
+      currentUrl,
+      nextId,
+      siyavulaActivityId,
+      showRetryBtn
     ) {
       $(document).ready(function () {
         // Initialise MathJax typesetting
         var nodes = Y.all(".latex-math");
         Y.fire(M.core.event.FILTER_CONTENT_UPDATED, { nodes: nodes });
 
-        show_retry_btn = parseInt(show_retry_btn);
+        showRetryBtn = parseInt(showRetryBtn);
         $(".question-content").on("click", function (e) {
           const response = e.currentTarget.dataset.response;
           const targetid = e.currentTarget.id;
@@ -33,9 +33,9 @@ define(["jquery", "core/ajax"], function ($, Ajax) {
               {
                 methodname: "filter_siyavula_submit_answers_siyavula",
                 args: {
-                  baseurl: baseurl,
+                  baseurl: baseUrl,
                   token: token,
-                  external_token: external_token,
+                  external_token: externalToken,
                   activityid: targetid,
                   responseid: response,
                   data: formData,
@@ -66,7 +66,7 @@ define(["jquery", "core/ajax"], function ($, Ajax) {
                       "changeseed=true"
                   );
 
-                  if (!show_retry_btn) {
+                  if (!showRetryBtn) {
                     // Hide the btn
                     retry.style.display = "none";
                   }
@@ -144,14 +144,14 @@ define(["jquery", "core/ajax"], function ($, Ajax) {
         });
 
         function checkQuestion() {
-          var id = activityid;
-          var param = idsq;
-          var next = next_id;
+          var id = activityId;
+          var param = idSq;
+          var next = nextId;
 
           var btn = document.querySelector("#a_next");
 
           if (btn) {
-            btn.href = `${currenturl}?templateId=${$siyavula_activity_id}&all_ids=${param}&show_id=${next}`;
+            btn.href = `${currentUrl}?templateId=${siyavulaActivityId}&all_ids=${param}&show_id=${next}`;
             if (next == false) {
               btn.innerHTML = "";
             }
