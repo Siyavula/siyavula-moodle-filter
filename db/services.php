@@ -6,8 +6,8 @@
         'methodname'  => 'submit_answer',
         'description' => 'Send Via API response answers.',
         'type'        => 'read',
-        'ajax'		  => true,
+        'ajax'          => true,
         'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE),
-    	'loginrequired' => false,
+        'loginrequired' => false,
     ),
-);
+ );
