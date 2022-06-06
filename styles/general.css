@@ -21,7 +21,3 @@ body, html {
     display: flex;
     justify-content: space-between;
 }
-
-.no-overflow{
-    display: none;
-}

@@ -1,6 +1,8 @@
 <?php
 require_once($CFG->dirroot . '/filter/siyavula/lib.php');
 
+use filter_siyavula\renderables\wrapper;
+
 class filter_siyavula extends moodle_text_filter {
 
     public function check_if_next($allids, $siyavulaactivityid) {
@@ -361,6 +363,7 @@ class filter_siyavula extends moodle_text_filter {
                 } else {
                     $siyavulaactivityid = $siyavulaactivityid[0];
                 }
+                $sectionid = $siyavulaactivityid;
 
                 // Check if retry question is send params.
                 $aid        = optional_param('aid', null, PARAM_RAW);
@@ -411,11 +414,24 @@ class filter_siyavula extends moodle_text_filter {
                         $questionapi->practice->chapter->mastery,
                         $questionapi->practice->section->title,
                         $questionapi->practice->section->mastery);
-                    echo $htmlpractice;
+                    // echo $htmlpractice;
 
-                    $result = $PAGE->requires->js_call_amd('filter_siyavula/externalpractice',
-                        'init', [$baseurl, $token, $externaltoken, $activityid, $responseid,
-                        $showbtnretry, $idqt, $seedqt]);
+                    // $siyavulaconfig = get_config('filter_siyavula');
+                    // echo '<link rel="stylesheet" href="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.css"/>';
+                    // echo '<link rel="stylesheet" href="' . $CFG->wwwroot . '/filter/siyavula/styles/general.css"/>';
+
+                    $result = $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init');
+
+                    $renderer = $PAGE->get_renderer('filter_siyavula');
+                    $wrapper = new wrapper();
+                    $wrapper->baseurl = $baseurl;
+                    $wrapper->token = $token;
+                    $wrapper->usertoken = $externaltoken;
+                    $wrapper->activitytype = 'practice';
+                    $wrapper->sectionid = $sectionid;
+                    $wrapped = $renderer->render_wrapper($wrapper);
+
+                    return $wrapped;
 
                     break;
                 }
