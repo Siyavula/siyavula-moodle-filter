@@ -12,23 +12,27 @@
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
 {{!
-    @template filter_siyavula/wrapper
-    Ally anchor / image wrapper template.
+    @template filter_siyavula/activity_renderable
+    Template to render a Siyavula Activity.
     Context variables required for this template:
-    * isimage - If true renders markup for an image.
-    * url - The file url URL.
-    * fileid - The ID.
-    * html - The html of the element to be wrapped.
-    * canviewfeedback - If true renders feedback placeholder.
-    * candownload - If true renders download placeholder.
+    * baseurl - The URL used to access Siyavula's API.
+    * token - The client's token.
+    * usertoken - The user's token.
+    * activitytype - The type of activity to be rendered i.e. ['practice', 'standalone', 'assignment'].
+    * assignmentid - The assignment activity's id. (Assignment only)
+    * sectionid - The practice activity's section id. (Practice only)
+    * templateid - The template's id. (Standalone only)
+    * randomseed - The template's random seed. (Standalone only)
     Example context (json):
     {
-        "isimage": false,
-        "url": "#",
-        "fileid": "ABCD123",
-        "html: : "",
-        "canviewfeedback" : true,
-        "candownload" : true
+        "baseurl": 'https://www.siyavula.com/',
+        "token": "eyJpZCI6MTksIm5hbWUiOiJlYnciLCJjbGllbnRfaXAiOiIwLjAuMC4wIiwiZXhwI...",
+        "usertoken": "eyJpZCI6MTksIm5hbWUiOiJlYnciLCJjbGllbnRfaXAiOiIwLjAuMC4wIiwiZXhwI...",
+        "activitytype: : "practice",
+        "assignmentid": 1,
+        "sectionid" : 204,
+        "templateid": 1220,
+        "randomseed": 25486
     }
 }}
 <link rel="stylesheet" href="{{ baseurl }}static/themes/emas/siyavula-api/siyavula-api.min.css" />
@@ -37,15 +41,30 @@
     var baseUrl = '{{ baseurl }}';
     var token = '{{ token }}';
     var userToken = '{{ usertoken }}';
-    var activityType = 'practice';
-    var sectionId = {{ sectionid }};
+    var activityType = '{{ activitytype }}';
+    {{#assignmentid}}
+        var assignmentId = {{ assignmentid }};
+    {{/assignmentid}}
+    {{#sectionid}}
+        var sectionId = {{ sectionid }};
+    {{/sectionid}}
+    {{#templateid}}
+        var templateId = {{ templateid }};
+    {{/templateid}}
+    {{#randomseed}}
+        var randomSeed = {{ randomseed }};
+    {{/randomseed}}
 </script>
 <main class="sv-region-main emas sv">
+    <!-- Only display mastery for practice activities. -->
+    {{#sectionid}}
     <span class="emphasis-bold answer">Chapter Mastery (<span id="chapter-mastery-title"></span>):</span><br>
     <progress class="progress" id="chapter-mastery" value="0" max="100" data-text="0%"></progress><br>
     <span class="emphasis-bold answer">Section Mastery (<span id="section-mastery-title"></span>):</span><br>
     <progress class="progress" id="section-mastery" value="0" max="100" data-text="0%"></progress><br>
     <br>
+    {{/sectionid}}
+
     <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
     <div class="question-wrapper">
         <div class="question-content"></div>

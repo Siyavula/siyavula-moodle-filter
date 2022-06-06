@@ -14,19 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Renderable for ally wrapper.
- * @author    Guy Thomas
- * @copyright Copyright (c) 2017 Open LMS
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 namespace filter_siyavula\renderables;
 
-class wrapper implements \renderable {
+class activity_renderable implements \renderable {
     public $baseurl;
     public $token;
     public $usertoken;
     public $activitytype;
-    public $sectionid;
 }
