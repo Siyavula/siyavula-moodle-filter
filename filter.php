@@ -41,7 +41,7 @@ class filter_siyavula extends moodle_text_filter {
             return $text;
         }
 
-        $clientip       = $_SERVER['REMOTE_ADDR'];
+        $clientip = $_SERVER['REMOTE_ADDR'];
         $siyavulaconfig = get_config('filter_siyavula');
         $token = siyavula_get_user_token($siyavulaconfig, $clientip);
         $usertoken = siyavula_get_external_user_token($siyavulaconfig, $clientip, $token);
