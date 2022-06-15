@@ -18,8 +18,82 @@ require_once($CFG->dirroot . '/filter/siyavula/lib.php');
 
 use filter_siyavula\renderables\practice_activity_renderable;
 use filter_siyavula\renderables\standalone_activity_renderable;
+use filter_siyavula\renderables\standalone_list_activity_renderable;
 
 class filter_siyavula extends moodle_text_filter {
+
+    public function get_activity_type($text) {
+        if (strpos($text, 'syp') == true) {
+            $activitytype = 'practice';
+        } else if (strpos($text, 'sy') == true) {
+            if (strpos($text, ',') == true) {
+                $activitytype = 'standaloneList';
+            } else {
+                $activitytype = 'standalone';
+            }
+        } else {
+            $activitytype = null;
+        }
+
+        return $activitytype;
+    }
+
+    public function parse_filter_text($text) {
+        // Strip whitespace.
+        $text = preg_replace("/\s+/", "", $text);
+        // Strip "[[" and "]]" identifiers.
+        $text = str_replace("[[", "", $text);
+        $text = str_replace("]]", "", $text);
+        // Strip "sy-" and "syp-" identifiers.
+        $text = str_replace("sy-", "", $text);
+        $text = str_replace("syp-", "", $text);
+        // Convert filter string to array.
+        $textarray = explode(",", $text);
+
+        // Parse the text into an array with the structure
+        // [[template_id,random_seed(optional)]]
+        // i.e: [[1220, 458724], [1221]].
+        $templatelist = [];
+        foreach ($textarray as $key => $item) {
+            if (strpos($text, '|') == true) {
+                $item = explode("|", $item);
+                // Strip all non-numeric characters.
+                $item[0] = preg_replace('/[^0-9]/', '', $item[0]);
+                $item[1] = preg_replace('/[^0-9]/', '', $item[1]);
+                // Convert to integer.
+                $item[0] = (int)$item[0];
+                $item[1] = (int)$item[1];
+            } else {
+                // Strip all non-numeric characters.
+                $item = preg_replace('/[^0-9]/', '', $item);
+                // Convert to integer.
+                $item = (int)$item;
+            }
+
+            array_push($templatelist, $item);
+        }
+
+        return $templatelist;
+    }
+
+    public function get_standalone_activity_data($text) {
+        $templatelist = $this->parse_filter_text($text);
+        $templateid = $templatelist[0];
+        $randomseed = (isset($templatelist[1]) ? $templatelist[1] : rand(1, 99999));
+
+        return array($templateid, $randomseed);
+    }
+
+    public function get_standalone_list_activity_data($text) {
+        return $this->parse_filter_text($text);
+    }
+
+    public function get_practice_activity_data($text) {
+        $templatelist = $this->parse_filter_text($text);
+        $sectionid = $templatelist[0];
+
+        return $sectionid;
+    }
 
     public function filter($text, array $options = array()) {
 
@@ -33,11 +107,8 @@ class filter_siyavula extends moodle_text_filter {
             exit();
         }
 
-        if (strpos($text, 'syp') == true) {
-            $activitytype = 'practice';
-        } else if (strpos($text, 'sy') == true) {
-            $activitytype = 'standalone';
-        } else {
+        $activitytype = $this->get_activity_type($text);
+        if (!$activitytype) {
             return $text;
         }
 
@@ -51,9 +122,7 @@ class filter_siyavula extends moodle_text_filter {
         $result = $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init');
 
         if ($activitytype == 'standalone') {
-            preg_match_all('!\d+!', $text, $matches);
-            $templateid  = $matches[0][0];
-            $randomseed = (isset($seed) ? $seed : rand(1, 99999));
+            list($templateid, $randomseed) = $this->get_standalone_activity_data($text);
 
             $renderer = $PAGE->get_renderer('filter_siyavula');
             $activityrenderable = new standalone_activity_renderable();
@@ -65,9 +134,20 @@ class filter_siyavula extends moodle_text_filter {
             $activityrenderable->randomseed = $randomseed;
 
             return $renderer->render_standalone_activity($activityrenderable);
+        } else if ($activitytype == 'standaloneList') {
+            $templatelist = $this->get_standalone_list_activity_data($text);
+
+            $renderer = $PAGE->get_renderer('filter_siyavula');
+            $activityrenderable = new standalone_activity_renderable();
+            $activityrenderable->baseurl = $baseurl;
+            $activityrenderable->token = $token;
+            $activityrenderable->usertoken = $usertoken->token;
+            $activityrenderable->activitytype = $activitytype;
+            $activityrenderable->templatelist = json_encode($templatelist);
+
+            return $renderer->render_standalone_activity($activityrenderable);
         } else if ($activitytype == 'practice') {
-            preg_match_all('!\d+!', $text, $matches);
-            $sectionid = $matches[0][0];
+            $sectionid = $this->get_practice_activity_data($text);
 
             $renderer = $PAGE->get_renderer('filter_siyavula');
             $activityrenderable = new practice_activity_renderable();

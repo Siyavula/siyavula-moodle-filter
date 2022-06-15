@@ -23,6 +23,7 @@
     * sectionid - The practice activity's section id. (Practice only)
     * templateid - The template's id. (Standalone only)
     * randomseed - The template's random seed. (Standalone only)
+    * templatelist - The list of templates and random seeds (Standalone List only)
     Example context (json):
     {
         "baseurl": 'https://www.siyavula.com/',
@@ -32,7 +33,8 @@
         "assignmentid": 1,
         "sectionid" : 204,
         "templateid": 1220,
-        "randomseed": 25486
+        "randomseed": 25486,
+        "templatelist": [[4858], [2216, 339850], [2198], [4901, 339297], [4902]]
     }
 }}
 <link rel="stylesheet" href="{{ baseurl }}static/themes/emas/siyavula-api/siyavula-api.min.css" />
@@ -54,6 +56,9 @@
     {{#randomseed}}
         var randomSeed = {{ randomseed }};
     {{/randomseed}}
+    {{#templatelist}}
+        var templateList = {{ templatelist }};
+    {{/templatelist}}
 </script>
 <main class="sv-region-main emas sv">
     <!-- Only display mastery for practice activities. -->
