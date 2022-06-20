@@ -67,7 +67,7 @@ class filter_siyavula extends moodle_text_filter {
                 // Strip all non-numeric characters.
                 $item = preg_replace('/[^0-9]/', '', $item);
                 // Convert to integer.
-                $item = (int)$item;
+                $item = [(int)$item];
             }
 
             array_push($templatelist, $item);
