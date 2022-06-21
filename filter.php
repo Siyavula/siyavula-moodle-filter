@@ -77,7 +77,7 @@ class filter_siyavula extends moodle_text_filter {
     }
 
     public function get_standalone_activity_data($text) {
-        $templatelist = $this->parse_filter_text($text);
+        $templatelist = $this->parse_filter_text($text)[0];
         $templateid = $templatelist[0];
         $randomseed = (isset($templatelist[1]) ? $templatelist[1] : rand(1, 99999));
 
@@ -89,7 +89,7 @@ class filter_siyavula extends moodle_text_filter {
     }
 
     public function get_practice_activity_data($text) {
-        $templatelist = $this->parse_filter_text($text);
+        $templatelist = $this->parse_filter_text($text)[0];
         $sectionid = $templatelist[0];
 
         return $sectionid;
