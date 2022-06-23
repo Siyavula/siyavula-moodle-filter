@@ -2,6 +2,22 @@ body, html {
     width: auto;
 }
 
+.practice-content-wrapper{
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+#exercise {
+    order: 0;
+    padding: 3%;
+}
+
+#mastery {
+    order: 1;
+    padding: 3%;
+}
+
 .monassis .icon{
     font-family: 'sv-ui-icon';
 }

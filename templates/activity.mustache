@@ -62,17 +62,22 @@
 </script>
 <main class="sv-region-main emas sv">
     <!-- Only display mastery for practice activities. -->
-    {{#sectionid}}
-    <span class="emphasis-bold answer">Chapter Mastery (<span id="chapter-mastery-title"></span>):</span><br>
-    <progress class="progress" id="chapter-mastery" value="0" max="100" data-text="0%"></progress><br>
-    <span class="emphasis-bold answer">Section Mastery (<span id="section-mastery-title"></span>):</span><br>
-    <progress class="progress" id="section-mastery" value="0" max="100" data-text="0%"></progress><br>
-    <br>
-    {{/sectionid}}
-
-    <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
-        <div class="question-wrapper">
-            <div class="question-content"></div>
+    <div class="practice-content-wrapper">
+        <div id="mastery">
+            {{#sectionid}}
+                <span class="emphasis-bold answer">Chapter Mastery (<span id="c$
+                <progress class="progress" id="chapter-mastery" value="0" max="$
+                <span class="emphasis-bold answer">Section Mastery (<span id="s$
+                <progress class="progress" id="section-mastery" value="0" max="$
+                <br>
+            {{/sectionid}}
+        </div>
+        <div id="exercise">
+            <div id="monassis" class="monassis monassis--practice monassis--mat$
+                <div class="question-wrapper">
+                    <div class="question-content"></div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
