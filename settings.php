@@ -28,7 +28,7 @@ $clientname = new admin_setting_configtext(
     'filter_siyavula/client_name',
     get_string('siyavula_client_name', 'filter_siyavula'),
     get_string('siyavula_client_name_desc', 'filter_siyavula'),
-    ' ',
+    '',
     PARAM_NOTAGS
 );
 
@@ -36,7 +36,7 @@ $clientpassword = new admin_setting_configpasswordunmask(
     'filter_siyavula/client_password',
     get_string('siyavula_client_password', 'filter_siyavula'),
     get_string('siyavula_client_password_desc', 'filter_siyavula'),
-    ' ',
+    '',
     PARAM_NOTAGS
 );
 
@@ -68,13 +68,6 @@ $clientcurriculum = new admin_setting_configselect(
     get_string('siyavula_curriculum_desc', 'filter_siyavula'),
     'INTL',
     $options
-);
-
-$mathjax = new admin_setting_configcheckbox(
-    'filter_siyavula/mathjax',
-    get_string('siyavula_mathjax', 'filter_siyavula'),
-    get_string('siyavula_mathjax', 'filter_siyavula'),
-    1
 );
 
 $showretry = new admin_setting_configcheckbox(
