@@ -161,6 +161,5 @@ $settings->add($clientname);
 $settings->add($clientpassword);
 $settings->add($clientregion);
 $settings->add($clientcurriculum);
-$settings->add($mathjax);
 $settings->add($showretry);
 $settings->add($debugenabled);
