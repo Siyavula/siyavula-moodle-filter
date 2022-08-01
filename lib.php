@@ -407,8 +407,6 @@ function get_activity_standalone($questionid, $token, $external_token, $baseurl,
 function get_activity_response($token, $usertoken, $baseurl, $activityid, $responseid) {
     global $USER, $CFG;
 
-    $payload = json_encode($data);
-
     $curl = curl_init();
 
     curl_setopt_array($curl, array(
