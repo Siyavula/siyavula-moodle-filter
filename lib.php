@@ -403,3 +403,31 @@ function get_activity_standalone($questionid, $token, $external_token, $baseurl,
 
     return $response;
 }
+
+function get_activity_response($token, $usertoken, $baseurl, $activityid, $responseid) {
+    global $USER, $CFG;
+
+    $payload = json_encode($data);
+
+    $curl = curl_init();
+
+    curl_setopt_array($curl, array(
+      CURLOPT_URL => $baseurl.'api/siyavula/v1/activity/'.$activityid.'/response/'.$responseid,
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_ENCODING => "",
+      CURLOPT_MAXREDIRS => 10,
+      CURLOPT_TIMEOUT => 0,
+      CURLOPT_FOLLOWLOCATION => true,
+      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+      CURLOPT_CUSTOMREQUEST => "POST",
+      CURLOPT_POSTFIELDS => $payload,
+      CURLOPT_HTTPHEADER => array('JWT: ' .$token, 'Authorization: JWT ' .$usertoken),
+    ));
+
+    $response = curl_exec($curl);
+    $response = json_decode($response);
+
+    curl_close($curl);
+
+    return $response;
+}
