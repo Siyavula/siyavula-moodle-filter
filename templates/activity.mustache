@@ -59,6 +59,12 @@
     {{#templatelist}}
         var templateList = {{ templatelist }};
     {{/templatelist}}
+    {{#activityid}}
+        var activityId = '{{ activityid }}';
+    {{/activityid}}
+    {{#responseid}}
+        var responseId = '{{ responseid }}';
+    {{/responseid}}
 </script>
 <main class="sv-region-main emas sv">
     <!-- Only display mastery for practice activities. -->
@@ -101,9 +107,10 @@
 
     <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
         <div class="question-wrapper">
+            <div id="sequence-num"></div>
             <div class="question-content"></div>
         </div>
     </div>
 </main>
 
-<script src="{{ baseurl }}static/themes/emas/siyavula-api/siyavula-api.min.js"></script>
+<script src="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.js"></script>
