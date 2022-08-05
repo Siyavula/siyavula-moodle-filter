@@ -25,3 +25,10 @@ body, html {
     display: flex;
     justify-content: space-between;
 }
+
+.step-counter {
+    font-weight: 700;
+    font-size: 1.5em;
+    padding-bottom: 2%;
+    color: #008bb2;
+}
