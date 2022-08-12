@@ -15,9 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 use filter_siyavula\renderables\activity_renderable;
+use filter_siyavula\renderables\get_activity_renderable;
 use filter_siyavula\renderables\practice_activity_renderable;
 use filter_siyavula\renderables\standalone_activity_renderable;
 use filter_siyavula\renderables\standalone_list_activity_renderable;
+use filter_siyavula\renderables\question_feedback_renderable;
 
 class filter_siyavula_renderer extends plugin_renderer_base {
     public function render_practice_activity(practice_activity_renderable $practiceactivityrenderable) {
@@ -30,5 +32,13 @@ class filter_siyavula_renderer extends plugin_renderer_base {
 
     public function render_standalone_list_activity(standalone_list_activity_renderable $standalonelistactivityrenderable) {
         return $this->render_from_template('filter_siyavula/activity', $standalonelistactivityrenderable);
+    }
+
+    public function render_get_activity(get_activity_renderable $getactivityrenderable) {
+        return $this->render_from_template('filter_siyavula/activity', $getactivityrenderable);
+    }
+
+    public function render_question_feedback(question_feedback_renderable $questionfeedbackrenderable) {
+        return $this->render_from_template('filter_siyavula/question_feedback', $questionfeedbackrenderable);
     }
 }
