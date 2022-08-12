@@ -1,0 +1,34 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template filter_siyavula/activity_renderable
+    Template to render a Siyavula Activity.
+    Context variables required for this template:
+    * baseurl - The URL used to access Siyavula's API.
+    * html - The question's html.
+    Example context (json):
+    {
+        "baseurl": 'https://www.siyavula.com/',
+        "html": "<html></html>",
+    }
+}}
+<link rel="stylesheet" href="{{ baseurl }}static/themes/emas/siyavula-api/siyavula-api.min.css" />
+<link rel="stylesheet" href="{{ $CFG->wwwroot }}/filter/siyavula/styles/general.css" />
+<main class="sv-region-main emas sv">
+    <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
+        <div class="question-wrapper">
+            <div class="question-content">{{{ html }}}</div>
+        </div>
+    </div>
+</main>
