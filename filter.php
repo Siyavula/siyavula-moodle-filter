@@ -23,7 +23,7 @@ use filter_siyavula\renderables\standalone_list_activity_renderable;
 class filter_siyavula extends moodle_text_filter {
 
     public function get_activity_type($text) {
-        if (str_starts_with($text, '[[') && str_ends_with($text, ']]')) {
+        if (substr($text, 0, 2) === '[[' && substr($text, -2) == ']]') {
             if (strpos($text, 'syp') == true) {
                 $activitytype = 'practice';
             } else if (strpos($text, 'sy') == true) {
