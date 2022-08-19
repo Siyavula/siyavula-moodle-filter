@@ -23,17 +23,13 @@ use filter_siyavula\renderables\standalone_list_activity_renderable;
 class filter_siyavula extends moodle_text_filter {
 
     public function get_activity_type($text) {
-        if (substr($text, 0, 2) === '[[' && substr($text, -2) === ']]') {
-            if (strpos($text, 'syp') == true) {
-                $activitytype = 'practice';
-            } else if (strpos($text, 'sy') == true) {
-                if (strpos($text, ',') == true) {
-                    $activitytype = 'standaloneList';
-                } else {
-                    $activitytype = 'standalone';
-                }
+        if (strpos($text, '[[syp') !== false) {
+            $activitytype = 'practice';
+        } else if (strpos($text, '[[sy') !== false) {
+            if (strpos($text, ',') == true) {
+                $activitytype = 'standaloneList';
             } else {
-                $activitytype = null;
+                $activitytype = 'standalone';
             }
         } else {
             $activitytype = null;
