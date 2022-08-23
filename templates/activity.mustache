@@ -39,6 +39,7 @@
 }}
 <link rel="stylesheet" href="{{ baseurl }}static/themes/emas/siyavula-api/siyavula-api.min.css" />
 <link rel="stylesheet" href="{{ $CFG->wwwroot }}/filter/siyavula/styles/general.css" />
+{{> filter_siyavula/mathjax_config}}
 <script type="text/javascript">
     var baseUrl = '{{ baseurl }}';
     var token = '{{ token }}';
@@ -69,40 +70,7 @@
 <main class="sv-region-main emas sv">
     <!-- Only display mastery for practice activities. -->
     {{#sectionid}}
-    <span class="emphasis-bold answer">Chapter Mastery (<span id="chapter-mastery-title"></span>):</span><br>
-        <svg style="display:none;">
-            <defs>
-                <symbol id="mastery-stars">
-                    <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z M0 0 h24 v24 h-24 v-24" fill="white" fill-rule="evenodd"/>
-                    <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z M0 0 h24 v24 h-24 v-24" fill="white" fill-rule="evenodd" transform="translate(24)"/>
-                    <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z M0 0 h24 v24 h-24 v-24" fill="white" fill-rule="evenodd" transform="translate(48)"/>
-                    <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z M0 0 h24 v24 h-24 v-24" fill="white" fill-rule="evenodd" transform="translate(72)"/>
-                    <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z M0 0 h24 v24 h-24 v-24" fill="white" fill-rule="evenodd"  transform="translate(96)"/>
-                </symbol>
-            </defs>
-        </svg>
-        <div class="mastery">
-            <progress class="mastery-bg" id="chapter-mastery" value="0" max="100"></progress>
-            <svg><use xlink:href="#mastery-stars"/></svg>
-        </div>
-    <br>
-    <span class="emphasis-bold answer">Section Mastery (<span id="section-mastery-title"></span>):</span><br>
-        <svg style="display:none;">
-            <defs>
-                <symbol id="mastery-stars">
-                    <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z M0 0 h24 v24 h-24 v-24" fill="white" fill-rule="evenodd"/>
-                    <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z M0 0 h24 v24 h-24 v-24" fill="white" fill-rule="evenodd" transform="translate(24)"/>
-                    <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z M0 0 h24 v24 h-24 v-24" fill="white" fill-rule="evenodd" transform="translate(48)"/>
-                    <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z M0 0 h24 v24 h-24 v-24" fill="white" fill-rule="evenodd" transform="translate(72)"/>
-                    <path d="M12 .587l3.668 7.568 8.332 1.151-6.064 5.828 1.48 8.279-7.416-3.967-7.417 3.967 1.481-8.279-6.064-5.828 8.332-1.151z M0 0 h24 v24 h-24 v-24" fill="white" fill-rule="evenodd"  transform="translate(96)"/>
-                </symbol>
-            </defs>
-        </svg>
-        <div class="mastery">
-            <progress class="mastery-bg" id="section-mastery" value="0" max="100"></progress>
-            <svg><use xlink:href="#mastery-stars"/></svg>
-        </div>
-    <br>
+        {{> filter_siyavula/mastery}}
     {{/sectionid}}
 
     <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
@@ -112,4 +80,4 @@
     </div>
 </main>
 
-<script src="https://www.siyavula.com/static/themes/emas/siyavula-api/siyavula-api.min.js"></script>
+<script src="{{ baseurl }}/static/themes/emas/siyavula-api/siyavula-api.min.js"></script>
