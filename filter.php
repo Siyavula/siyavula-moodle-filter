@@ -44,7 +44,6 @@ class filter_siyavula extends moodle_text_filter {
         } else {
             $text = "";
         }
-
         // Strip whitespace.
         $text = preg_replace("/\s+/", "", $text);
         // Strip "sy-" and "syp-" identifiers.
@@ -115,6 +114,20 @@ class filter_siyavula extends moodle_text_filter {
             return $text;
         }
 
+
+        // Determine text wrapped around the Siyavula filter string.
+        try {
+            $prepos = strpos($text, '[[');
+            $postpos = strpos($text, ']]');
+            // Text before the string.
+            $prestring = substr($text, 0, $prepos - 1);
+            // Text after the string.
+            $poststring = substr($text, $postpos + 2);
+        } catch(Exception $e) {
+            $prestring = '';
+            $poststring = '';
+        }
+
         $clientip = $_SERVER['REMOTE_ADDR'];
         $siyavulaconfig = get_config('filter_siyavula');
         $token = siyavula_get_user_token($siyavulaconfig, $clientip);
@@ -123,6 +136,9 @@ class filter_siyavula extends moodle_text_filter {
         $baseurl = $siyavulaconfig->url_base;
 
         $result = $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init');
+
+        // Prepend initial text.
+        echo $prestring;
 
         if ($activitytype == 'standalone') {
             list($templateid, $randomseed) = $this->get_standalone_activity_data($text);
@@ -136,7 +152,7 @@ class filter_siyavula extends moodle_text_filter {
             $activityrenderable->templateid = $templateid;
             $activityrenderable->randomseed = $randomseed;
 
-            return $renderer->render_standalone_activity($activityrenderable);
+            $result .= $renderer->render_standalone_activity($activityrenderable);
         } else if ($activitytype == 'standaloneList') {
             $templatelist = $this->get_standalone_list_activity_data($text);
 
@@ -148,7 +164,7 @@ class filter_siyavula extends moodle_text_filter {
             $activityrenderable->activitytype = $activitytype;
             $activityrenderable->templatelist = json_encode($templatelist);
 
-            return $renderer->render_standalone_activity($activityrenderable);
+            $result .= $renderer->render_standalone_activity($activityrenderable);
         } else if ($activitytype == 'practice') {
             $sectionid = $this->get_practice_activity_data($text);
 
@@ -160,8 +176,11 @@ class filter_siyavula extends moodle_text_filter {
             $activityrenderable->activitytype = $activitytype;
             $activityrenderable->sectionid = $sectionid;
 
-            return $renderer->render_practice_activity($activityrenderable);
+            $result .= $renderer->render_practice_activity($activityrenderable);
         }
+
+        // Append text after filter.
+        $result .= $poststring;
 
         // Render questions not apply format siyavula.
         if (!empty($result)) {
