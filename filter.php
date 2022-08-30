@@ -38,11 +38,15 @@ class filter_siyavula extends moodle_text_filter {
     }
 
     public function parse_filter_text($text) {
+        // Get the text
+        if (preg_match('/\[\[(.*?)\]\]/', $text, $matches)) {
+            $text = $matches[1];
+        } else {
+            $text = "";
+        }
+
         // Strip whitespace.
         $text = preg_replace("/\s+/", "", $text);
-        // Strip "[[" and "]]" identifiers.
-        $text = str_replace("[[", "", $text);
-        $text = str_replace("]]", "", $text);
         // Strip "sy-" and "syp-" identifiers.
         $text = str_replace("sy-", "", $text);
         $text = str_replace("syp-", "", $text);
