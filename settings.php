@@ -77,6 +77,13 @@ $showretry = new admin_setting_configcheckbox(
     0
 );
 
+$showlivepreview = new admin_setting_configcheckbox(
+    'filter_siyavula/showlivepreview',
+    get_string('siyavula_showlivepreview', 'filter_siyavula'),
+    get_string('siyavula_showlivepreview', 'filter_siyavula'),
+    0
+);
+
 
 $options = array(
     '0' => get_string('disabled_debugging', 'filter_siyavula'),
@@ -162,4 +169,5 @@ $settings->add($clientpassword);
 $settings->add($clientregion);
 $settings->add($clientcurriculum);
 $settings->add($showretry);
+$settings->add($showlivepreview);
 $settings->add($debugenabled);
