@@ -81,7 +81,7 @@ $showlivepreview = new admin_setting_configcheckbox(
     'filter_siyavula/showlivepreview',
     get_string('siyavula_showlivepreview', 'filter_siyavula'),
     get_string('siyavula_showlivepreview', 'filter_siyavula'),
-    0
+    1
 );
 
 
