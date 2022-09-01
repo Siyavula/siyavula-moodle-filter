@@ -165,7 +165,11 @@ class filter_siyavula extends moodle_text_filter {
         // TODO: Refactor this (LC)
         // Strip HTML
         $newtext = strip_tags($text);
-        $re = '/\[{2}[sy\-\d{1,},?|]*\]{2}/m';
+        if ($activitytype == 'practice') {
+            $re = '/\[{2}[syp\-\d{1,},?|]*\]{2}/m';
+        } else {
+            $re = '/\[{2}[sy\-\d{1,},?|]*\]{2}/m';
+        }
         // Find the [[sy{p}-]] filter
         preg_match_all($re, $newtext, $matches);
         // Define the correct match
