@@ -127,6 +127,7 @@ class filter_siyavula extends moodle_text_filter {
             $renderer = $PAGE->get_renderer('filter_siyavula');
             $activityrenderable = new standalone_activity_renderable();
             $activityrenderable->baseurl = $baseurl;
+            $activityrenderable->showlivepreview = $showlivepreview;
             $activityrenderable->token = $token;
             $activityrenderable->usertoken = $usertoken->token;
             $activityrenderable->activitytype = $activitytype;
@@ -140,6 +141,7 @@ class filter_siyavula extends moodle_text_filter {
             $renderer = $PAGE->get_renderer('filter_siyavula');
             $activityrenderable = new standalone_activity_renderable();
             $activityrenderable->baseurl = $baseurl;
+            $activityrenderable->showlivepreview = $showlivepreview;
             $activityrenderable->token = $token;
             $activityrenderable->usertoken = $usertoken->token;
             $activityrenderable->activitytype = $activitytype;
@@ -152,6 +154,7 @@ class filter_siyavula extends moodle_text_filter {
             $renderer = $PAGE->get_renderer('filter_siyavula');
             $activityrenderable = new practice_activity_renderable();
             $activityrenderable->baseurl = $baseurl;
+            $activityrenderable->showlivepreview = $showlivepreview;
             $activityrenderable->token = $token;
             $activityrenderable->usertoken = $usertoken->token;
             $activityrenderable->activitytype = $activitytype;
