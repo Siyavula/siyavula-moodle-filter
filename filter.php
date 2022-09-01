@@ -116,6 +116,7 @@ class filter_siyavula extends moodle_text_filter {
         $token = siyavula_get_user_token($siyavulaconfig, $clientip);
         $usertoken = siyavula_get_external_user_token($siyavulaconfig, $clientip, $token);
         $showbtnretry = $siyavulaconfig->showretry;
+        $showlivepreview = $siyavulaconfig->showlivepreview;
         $baseurl = $siyavulaconfig->url_base;
 
         $result = $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init');
