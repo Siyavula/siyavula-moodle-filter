@@ -38,11 +38,14 @@ class filter_siyavula extends moodle_text_filter {
     }
 
     public function parse_filter_text($text) {
+        // Get the text
+        if (preg_match('/\[\[(.*?)\]\]/', $text, $matches)) {
+            $text = $matches[1];
+        } else {
+            $text = "";
+        }
         // Strip whitespace.
         $text = preg_replace("/\s+/", "", $text);
-        // Strip "[[" and "]]" identifiers.
-        $text = str_replace("[[", "", $text);
-        $text = str_replace("]]", "", $text);
         // Strip "sy-" and "syp-" identifiers.
         $text = str_replace("sy-", "", $text);
         $text = str_replace("syp-", "", $text);
@@ -134,7 +137,7 @@ class filter_siyavula extends moodle_text_filter {
             $activityrenderable->templateid = $templateid;
             $activityrenderable->randomseed = $randomseed;
 
-            return $renderer->render_standalone_activity($activityrenderable);
+            $result .= $renderer->render_standalone_activity($activityrenderable);
         } else if ($activitytype == 'standaloneList') {
             $templatelist = $this->get_standalone_list_activity_data($text);
 
@@ -147,7 +150,7 @@ class filter_siyavula extends moodle_text_filter {
             $activityrenderable->activitytype = $activitytype;
             $activityrenderable->templatelist = json_encode($templatelist);
 
-            return $renderer->render_standalone_activity($activityrenderable);
+            $result .= $renderer->render_standalone_activity($activityrenderable);
         } else if ($activitytype == 'practice') {
             $sectionid = $this->get_practice_activity_data($text);
 
@@ -160,8 +163,23 @@ class filter_siyavula extends moodle_text_filter {
             $activityrenderable->activitytype = $activitytype;
             $activityrenderable->sectionid = $sectionid;
 
-            return $renderer->render_practice_activity($activityrenderable);
+            $result .= $renderer->render_practice_activity($activityrenderable);
         }
+
+        // TODO: Refactor this (LC)
+        // Strip HTML
+        $newtext = strip_tags($text);
+        if ($activitytype == 'practice') {
+            $re = '/\[{2}[syp\-\d{1,},?|]*\]{2}/m';
+        } else {
+            $re = '/\[{2}[sy\-\d{1,},?|]*\]{2}/m';
+        }
+        // Find the [[sy{p}-]] filter
+        preg_match_all($re, $newtext, $matches);
+        // Define the correct match
+        $text_to_replace_render = $matches[0][0];
+        // Replace the raw filter text with the question's HTML
+        $result = str_replace($text_to_replace_render, $result, $text);
 
         // Render questions not apply format siyavula.
         if (!empty($result)) {
