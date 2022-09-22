@@ -119,6 +119,7 @@ class filter_siyavula extends moodle_text_filter {
         $token = siyavula_get_user_token($siyavulaconfig, $clientip);
         $usertoken = siyavula_get_external_user_token($siyavulaconfig, $clientip, $token);
         $showbtnretry = $siyavulaconfig->showretry;
+        $showlivepreview = $siyavulaconfig->showlivepreview;
         $baseurl = $siyavulaconfig->url_base;
 
         $result = $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init');
@@ -129,6 +130,7 @@ class filter_siyavula extends moodle_text_filter {
             $renderer = $PAGE->get_renderer('filter_siyavula');
             $activityrenderable = new standalone_activity_renderable();
             $activityrenderable->baseurl = $baseurl;
+            $activityrenderable->showlivepreview = $showlivepreview;
             $activityrenderable->token = $token;
             $activityrenderable->usertoken = $usertoken->token;
             $activityrenderable->activitytype = $activitytype;
@@ -142,6 +144,7 @@ class filter_siyavula extends moodle_text_filter {
             $renderer = $PAGE->get_renderer('filter_siyavula');
             $activityrenderable = new standalone_activity_renderable();
             $activityrenderable->baseurl = $baseurl;
+            $activityrenderable->showlivepreview = $showlivepreview;
             $activityrenderable->token = $token;
             $activityrenderable->usertoken = $usertoken->token;
             $activityrenderable->activitytype = $activitytype;
@@ -154,6 +157,7 @@ class filter_siyavula extends moodle_text_filter {
             $renderer = $PAGE->get_renderer('filter_siyavula');
             $activityrenderable = new practice_activity_renderable();
             $activityrenderable->baseurl = $baseurl;
+            $activityrenderable->showlivepreview = $showlivepreview;
             $activityrenderable->token = $token;
             $activityrenderable->usertoken = $usertoken->token;
             $activityrenderable->activitytype = $activitytype;
