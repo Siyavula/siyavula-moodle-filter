@@ -17,6 +17,7 @@
 namespace filter_siyavula\renderables;
 
 class activity_renderable implements \renderable {
+    public $wwwroot;
     public $baseurl;
     public $token;
     public $usertoken;
