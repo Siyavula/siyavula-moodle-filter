@@ -101,13 +101,7 @@ class filter_siyavula extends moodle_text_filter {
 
         global $OUTPUT, $USER, $PAGE, $CFG, $DB;
 
-        // Verify if user not authenticated.
-        $userauth = false;
-        if (isguestuser() || $USER == null) {
-            $userauth = true;
-            header('Location: ' . $CFG->wwwroot . '/login/index.php');
-            exit();
-        }
+        require_login();
 
         $activitytype = $this->get_activity_type($text);
         if (!$activitytype) {
