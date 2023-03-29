@@ -17,6 +17,6 @@
 namespace filter_siyavula\renderables;
 use filter_siyavula\renderables\activity_renderable;
 
-class standalone_activity_renderable extends activity_renderable {
+class assignment_activity_renderable extends activity_renderable {
     public $assignmentid;
 }

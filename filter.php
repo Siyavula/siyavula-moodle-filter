@@ -102,7 +102,8 @@ class filter_siyavula extends moodle_text_filter {
     }
 
     public function get_assignment_activity_data($text) {
-        $assignmentid = $this->parse_filter_text($text)[0];
+        $templatelist = $this->parse_filter_text($text)[0];
+        $assignmentid = $templatelist[0];
 
         return $assignmentid;
     }
@@ -179,7 +180,7 @@ class filter_siyavula extends moodle_text_filter {
 
             $result .= $renderer->render_practice_activity($activityrenderable);
         } else if ($activitytype == 'assignment') {
-            $templatelist = $this->get_assignment_activity_data($text);
+            $assignmentid = $this->get_assignment_activity_data($text);
 
             $renderer = $PAGE->get_renderer('filter_siyavula');
             $activityrenderable = new assignment_activity_renderable();
@@ -189,7 +190,9 @@ class filter_siyavula extends moodle_text_filter {
             $activityrenderable->token = $token;
             $activityrenderable->usertoken = $usertoken->token;
             $activityrenderable->activitytype = $activitytype;
-            $activityrenderable->assignmentid = json_encode($assignmentid);
+            $activityrenderable->assignmentid = $assignmentid;
+
+            $result .= $renderer->render_assignment_activity($activityrenderable);
         }
 
         // TODO: Refactor this (LC)
@@ -197,6 +200,8 @@ class filter_siyavula extends moodle_text_filter {
         $newtext = strip_tags($text);
         if ($activitytype == 'practice') {
             $re = '/\[{2}[syp\-\d{1,},?|]*\]{2}/m';
+        } if ($activitytype == 'assignment') {
+            $re = '/\[{2}[sya\-\d{1,},?|]*\]{2}/m';
         } else {
             $re = '/\[{2}[sy\-\d{1,},?|]*\]{2}/m';
         }
