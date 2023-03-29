@@ -26,14 +26,14 @@ class filter_siyavula extends moodle_text_filter {
     public function get_activity_type($text) {
         if (strpos($text, '[[syp') !== false) {
             $activitytype = 'practice';
+        } else if (strpos($text, '[[sya') !== false)  {
+            $activitytype = 'assignment';
         } else if (strpos($text, '[[sy') !== false) {
             if (strpos($text, ',') == true) {
                 $activitytype = 'standaloneList';
             } else {
                 $activitytype = 'standalone';
             }
-        } else if (strpos($text, '[[sya') !== false)  {
-            $activitytype = 'assignment';
         } else {
             $activitytype = null;
         }
