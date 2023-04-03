@@ -236,4 +236,18 @@ input.toc {
   .sv .sv-session-badge--assignment {
       background: #0daa88;
       color: #ffffff;
+      border-radius: 1.0625em;
+      padding: .4375em .75em;
+      display: inline-block;
+      white-space: nowrap;
+  }
+
+  .sv .sv-session-badge__label {
+      font-family: Helvetica, Arial, sans-serif;
+      font-size: 1em;
+      font-weight: 700;
+      margin: 0 0 .0625rem;
+      padding: 0 .25em;
+      vertical-align: middle;
+      display: inline-block
   }
