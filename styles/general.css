@@ -251,3 +251,55 @@ input.toc {
       vertical-align: middle;
       display: inline-block
   }
+
+  .sv .sv-state-message {
+    -webkit-box-sizing: border-box;
+            box-sizing: border-box;
+    display: block;
+    position: relative;
+    margin: 0 auto 1.03125em; }
+
+  .sv .sv-state-message.sv-state-message--filled {
+    border-radius: 4px;
+    padding: 1.2em 0.8em; }
+
+  .sv .sv-state-message .sv-state-message__title {
+    font-family: Helvetica, Arial, sans-serif ;
+    color: inherit ;
+    font-size: 1em ;
+    font-weight: 400 ;
+    line-height: 1.375em ;
+    margin: 0 auto 1.03125em ;
+    font-weight: bold;
+    max-width: 24em; }
+
+  .sv .sv-state-message .sv-state-message__description {
+    margin-top: -0.51562em; }
+
+  .sv .sv-state-message.sv-state-message--completed .sv-state-message__title {
+      color: inherit; }
+  .sv .sv-state-message.sv-state-message--completed .sv-state-message__highlight {
+      color: #2c8d2d; }
+  .sv .sv-state-message.sv-state-message--completed .sv-state-message__description {
+      color: inherit; }
+  .sv .sv-state-message.sv-state-message--completed .sv-state-message__figure {
+      color: #45b449; }
+  .sv .sv-state-message.sv-state-message--filled > *:first-child {
+      margin-top: 0; }
+  .sv .sv-state-message.sv-state-message--filled > *:last-child {
+      margin-bottom: 0; }
+  .sv .sv-state-message.sv-state-message--completed.sv-state-message--assignment .sv-state-message__title {
+      color: inherit; }
+  .sv .sv-state-message.sv-state-message--completed.sv-state-message--assignment .sv-state-message__highlight {
+      color: #087f5d; }
+  .sv .sv-state-message.sv-state-message--completed.sv-state-message--assignment .sv-state-message__description {
+      color: inherit; }
+  .sv .sv-state-message.sv-state-message--completed.sv-state-message--assignment .sv-state-message__figure {
+      color: inherit; }
+  .sv .sv-state-message.sv-state-message--filled > *:first-child {
+      margin-top: 0; }
+  .sv .sv-state-message.sv-state-message--filled > *:last-child {
+      margin-bottom: 0; }
+  .sv .sv-state-message.sv-state-message--filled.sv-state-message--completed.sv-state-message--assignment {
+      background: #e3f4e4;
+      border: 1px solid #e3f4e4; }

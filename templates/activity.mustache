@@ -49,6 +49,11 @@
     {{#assignmentid}}
         var assignmentId = {{ assignmentid }};
     {{/assignmentid}}
+    {{#completed}}
+        var percentageCount = {{ percentageCount }};
+        var feedback = {{ feedback }};
+        var finalFeedback = {{ finalFeedback }};
+    {{/completed}}
     {{#sectionid}}
         var sectionId = {{ sectionid }};
     {{/sectionid}}
@@ -84,7 +89,16 @@
             </div>
         <div class="question-wrapper">
             <div class="question-content"></div>
-        </div>
+                {{#completed}}
+                    <div class="sv-state-message sv-state-message--filled sv-state-message--assignment sv-state-message--completed">
+                        <div class="sv-state-message__figure"></div>
+                        <h1 class="sv-state-message__title">{{feedback}}</h1>
+                        <div class="sv-state-message__description">
+                            <p>{{finalFeedback}}</p>
+                        </div>
+                    </div>
+                {{/completed}}
+            </div>
         </div>
     {{/assignmentid}}
 
