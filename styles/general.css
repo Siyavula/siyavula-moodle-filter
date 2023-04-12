@@ -296,10 +296,3 @@ input.toc {
     line-height: 1.5em;
     text-align: center;
     }
-
-  .sv .sv-form__actions .sv-button:last-child {
-    background: #0daa88;
-    border-color: transparent;
-    border-bottom-color: #0b9275;
-    color: #fff;
-  }
