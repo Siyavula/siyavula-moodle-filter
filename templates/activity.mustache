@@ -74,26 +74,19 @@
         {{> filter_siyavula/mastery}}
     {{/sectionid}}
 
-    {{#assignmentid}}
-        <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
+    <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
+        {{#assignmentid}}
             <div class="sv-session sv-session--assignment">
                 <div class="sv-session__title"> Assignment </div>
                 <div class="sv-session__actions">
                     <div class="sv-session-badge--assignment"></div>
                 </div>
             </div>
+        {{/assignmentid}}
         <div class="question-wrapper">
             <div class="question-content"></div>
         </div>
-    {{/assignmentid}}
-
-    {{^assignmentid}}
-        <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
-            <div class="question-wrapper">
-                <div class="question-content"></div>
-            </div>
-        </div>
-    {{/assignmentid}}
+    </div>
 </main>
 
 <script src="{{ baseurl }}/static/themes/emas/siyavula-api/siyavula-api.min.js"></script>
