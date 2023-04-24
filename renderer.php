@@ -20,10 +20,15 @@ use filter_siyavula\renderables\practice_activity_renderable;
 use filter_siyavula\renderables\standalone_activity_renderable;
 use filter_siyavula\renderables\standalone_list_activity_renderable;
 use filter_siyavula\renderables\question_feedback_renderable;
+use filter_siyavula\renderables\assignment_activity_renderable;
 
 class filter_siyavula_renderer extends plugin_renderer_base {
     public function render_practice_activity(practice_activity_renderable $practiceactivityrenderable) {
         return $this->render_from_template('filter_siyavula/activity', $practiceactivityrenderable);
+    }
+
+    public function render_assignment_activity(assignment_activity_renderable $assignmentactivityrenderable) {
+        return $this->render_from_template('filter_siyavula/activity', $assignmentactivityrenderable);
     }
 
     public function render_standalone_activity(standalone_activity_renderable $standaloneactivityrenderable) {

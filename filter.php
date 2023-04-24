@@ -19,12 +19,15 @@ require_once($CFG->dirroot . '/filter/siyavula/lib.php');
 use filter_siyavula\renderables\practice_activity_renderable;
 use filter_siyavula\renderables\standalone_activity_renderable;
 use filter_siyavula\renderables\standalone_list_activity_renderable;
+use filter_siyavula\renderables\assignment_activity_renderable;
 
 class filter_siyavula extends moodle_text_filter {
 
     public function get_activity_type($text) {
         if (strpos($text, '[[syp') !== false) {
             $activitytype = 'practice';
+        } else if (strpos($text, '[[sya') !== false)  {
+            $activitytype = 'assignment';
         } else if (strpos($text, '[[sy') !== false) {
             if (strpos($text, ',') == true) {
                 $activitytype = 'standaloneList';
@@ -49,6 +52,7 @@ class filter_siyavula extends moodle_text_filter {
         // Strip "sy-" and "syp-" identifiers.
         $text = str_replace("sy-", "", $text);
         $text = str_replace("syp-", "", $text);
+        $text = str_replace("sya-", "", $text);
         // Convert filter string to array.
         $textarray = explode(",", $text);
 
@@ -96,6 +100,14 @@ class filter_siyavula extends moodle_text_filter {
 
         return $sectionid;
     }
+
+    public function get_assignment_activity_data($text) {
+        $templatelist = $this->parse_filter_text($text)[0];
+        $assignmentid = $templatelist[0];
+
+        return $assignmentid;
+    }
+
 
     public function filter($text, array $options = array()) {
 
@@ -167,6 +179,20 @@ class filter_siyavula extends moodle_text_filter {
             $activityrenderable->sectionid = $sectionid;
 
             $result .= $renderer->render_practice_activity($activityrenderable);
+        } else if ($activitytype == 'assignment') {
+            $assignmentid = $this->get_assignment_activity_data($text);
+
+            $renderer = $PAGE->get_renderer('filter_siyavula');
+            $activityrenderable = new assignment_activity_renderable();
+            $activityrenderable->wwwroot = $CFG->wwwroot;
+            $activityrenderable->baseurl = $baseurl;
+            $activityrenderable->showlivepreview = $showlivepreview;
+            $activityrenderable->token = $token;
+            $activityrenderable->usertoken = $usertoken->token;
+            $activityrenderable->activitytype = $activitytype;
+            $activityrenderable->assignmentid = $assignmentid;
+
+            $result .= $renderer->render_assignment_activity($activityrenderable);
         }
 
         // TODO: Refactor this (LC)
@@ -174,6 +200,8 @@ class filter_siyavula extends moodle_text_filter {
         $newtext = strip_tags($text);
         if ($activitytype == 'practice') {
             $re = '/\[{2}[syp\-\d{1,},?|]*\]{2}/m';
+        } if ($activitytype == 'assignment') {
+            $re = '/\[{2}[sya\-\d{1,},?|]*\]{2}/m';
         } else {
             $re = '/\[{2}[sy\-\d{1,},?|]*\]{2}/m';
         }
