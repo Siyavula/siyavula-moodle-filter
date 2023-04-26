@@ -75,6 +75,14 @@
     {{/sectionid}}
 
     <div id="monassis" class="monassis monassis--practice monassis--maths monassis--siyavula-api">
+        {{#assignmentid}}
+            <div class="sv-session sv-session--assignment">
+                <div class="sv-session__title"> Assignment </div>
+                <div class="sv-session__actions">
+                    <div class="sv-session-badge--assignment"></div>
+                </div>
+            </div>
+        {{/assignmentid}}
         <div class="question-wrapper">
             <div class="question-content"></div>
         </div>
