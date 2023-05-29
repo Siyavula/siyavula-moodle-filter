@@ -200,7 +200,7 @@ class filter_siyavula extends moodle_text_filter {
         $newtext = strip_tags($text);
         if ($activitytype == 'practice') {
             $re = '/\[{2}[syp\-\d{1,},?|]*\]{2}/m';
-        } if ($activitytype == 'assignment') {
+        } else if ($activitytype == 'assignment') {
             $re = '/\[{2}[sya\-\d{1,},?|]*\]{2}/m';
         } else {
             $re = '/\[{2}[sy\-\d{1,},?|]*\]{2}/m';
