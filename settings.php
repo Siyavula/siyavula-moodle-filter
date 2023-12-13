@@ -157,9 +157,9 @@ if ($id == 'filtersettingsiyavula') {
     }
 }
 
-
-
-if ($data = data_submitted() and confirm_sesskey() and isset($data->action) and $data->action == 'save-settings') {
+if ($PAGE->bodyid == 'page-admin-setting-filtersettingsiyavula' and
+    $data = data_submitted() and confirm_sesskey() and isset($data->action) and
+    $data->action == 'save-settings') {
     validate_params($data);
 }
 
