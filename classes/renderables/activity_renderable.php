@@ -22,4 +22,6 @@ class activity_renderable implements \renderable {
     public $token;
     public $usertoken;
     public $activitytype;
+    public $showlivepreview;
+    public $templatelist;
 }
