@@ -215,8 +215,16 @@ class filter_siyavula extends moodle_text_filter {
 
         // Render questions not apply format siyavula.
         if (!empty($result)) {
-            $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init');
+
+            // Current version is Moodle 3.9 or higher use the event types. Otherwise use the older versions.
+            if ($CFG->version >= 2022041904) {
+                $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init');
+            } else {
+                $PAGE->requires->js_call_amd('filter_siyavula/initmathjax-backward', 'init');
+            }
+
             return $result;
+
         } else {
             return $text;
         }
