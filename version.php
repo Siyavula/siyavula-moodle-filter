@@ -11,6 +11,6 @@ $plugin->supported = [
     410,
     420,
     430,
-    440
+    440,
 ];
 $plugin->release = '1.3.0';
