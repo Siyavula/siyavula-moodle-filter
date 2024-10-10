@@ -134,7 +134,8 @@ class filter_siyavula extends moodle_text_filter {
         $showlivepreview = $siyavulaconfig->showlivepreview;
         $baseurl = $siyavulaconfig->url_base;
 
-        $result = $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init');
+
+        $result = '';
 
         if ($activitytype == 'standalone') {
             list($templateid, $randomseed) = $this->get_standalone_activity_data($text);
@@ -214,9 +215,19 @@ class filter_siyavula extends moodle_text_filter {
 
         // Render questions not apply format siyavula.
         if (!empty($result)) {
+
+            // Current version is Moodle 3.9 or higher use the event types. Otherwise use the older versions.
+            if ($CFG->version >= 2022041904) {
+                $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init');
+            } else {
+                $PAGE->requires->js_call_amd('filter_siyavula/initmathjax-backward', 'init');
+            }
+
             return $result;
+
         } else {
             return $text;
         }
+
     }
 }
