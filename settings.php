@@ -21,6 +21,7 @@ $urlbase = new admin_setting_configtext(
     'https://www.siyavula.com/',
     PARAM_NOTAGS
 );
+
 $tokenget = '';
 $listusers = '';
 
@@ -98,6 +99,49 @@ $debugenabled = new admin_setting_configselect(
     $options
 );
 
+
+$corefields = \core_user::AUTHSYNCFIELDS;
+$key = array_search('lang', $corefields);
+unset($corefields[$key]);
+$corefieldslist = array_combine(
+    $corefields,
+    array_map(fn($v) => get_string($v, 'core'), $corefields)
+);
+
+$allcustomfields = profile_get_custom_fields();
+$customfieldname = array_combine(
+    array_map(fn($v) => 'profile_field_'. $v, array_column($allcustomfields, 'shortname')),
+    array_column($allcustomfields, 'name')
+);
+
+$userfields = array_merge(
+    $corefieldslist,
+    $customfieldname
+);
+
+$uniqueuserfield = new admin_setting_configselect(
+    'filter_siyavula/unique_user_field',
+    get_string('siyavula_unique_user_field', 'filter_siyavula'),
+    get_string('siyavula_unique_user_field_desc', 'filter_siyavula'),
+    'username',
+    $userfields
+);
+
+// Personal information shared with Siyavula.
+$personalfields = new admin_setting_configmulticheckbox(
+    'filter_siyavula/personal_fields',
+    get_string('siyavula_personal_fields', 'filter_siyavula'),
+    get_string('siyavula_personal_fields_desc', 'filter_siyavula'),
+    [
+        'firstname' => get_string('firstname'),
+        'lastname' => get_string('lastname'),
+        'country' => get_string('country'),
+        'email' => get_string('email'),
+        'phone1' => get_string('phone1')
+    ],
+    $userfields
+);
+
 // Only if the current page is the filter siyavula settings.
 if ($id == 'filtersettingsiyavula') {
     $clientip = $_SERVER['REMOTE_ADDR'];
@@ -116,8 +160,9 @@ if ($id == 'filtersettingsiyavula') {
     }
 
     if (!empty($getusers) && !empty($tokenresponse)) {
+
         foreach ($getusers as $user) {
-            $data[] = $user->email;
+            $data[] = $user->external_user_id ?: $user->email;
             $testtoken = '<a target="_blank" href="' . $CFG->wwwroot .
                 '/filter/siyavula/test_external_usertoken.php?token=' . $tokenresponse .
                 '">' . get_string('test_external_usertoken', 'filter_siyavula') . '</a>';
@@ -171,3 +216,5 @@ $settings->add($clientcurriculum);
 $settings->add($showretry);
 $settings->add($showlivepreview);
 $settings->add($debugenabled);
+$settings->add($uniqueuserfield);
+$settings->add($personalfields);

@@ -47,3 +47,8 @@ $string['randomseed_desc'] = 'Use this setting to indicate a "seed" that will be
 $string['modulenameplural'] = 'Siyavula';
 $string['siyavula_showretry'] = 'Show "Try Again" button';
 $string['siyavula_showlivepreview'] = 'Show Live Preview';
+
+$string['siyavula_unique_user_field'] = 'Unique user field';
+$string['siyavula_unique_user_field_desc'] = 'Unique user field to identify users in Siyavula. this field will be linked as external_userid in the Siyavula API.';
+$string['siyavula_personal_fields'] = 'Personal fields';
+$string['siyavula_personal_fields_desc'] = 'Personal fields to be shared with Siyavula. These fields will be used to create or update user profiles in the Siyavula API.';

@@ -62,31 +62,57 @@ function siyavula_get_user_token($siyavulaconfig, $clientip) {
     }
 }
 
-function siyavula_get_external_user_token($siyavulaconfig, $clientip, $token, $userid = 0) {
+/**
+ * Get the external user ID based on the Siyavula configuration and user profile.
+ *
+ * @param object $siyavulaconfig Configuration object for Siyavula.
+ * @param object $user User object containing profile information.
+ * @return string The external user ID, typically the user's email or a unique field.
+ */
+function siyavula_get_external_user_id($siyavulaconfig, $user) {
+
+    // Load the user's custom profile fields into the $USER object.
+    profile_load_data($user);
+
+    // Retrieve the unique user field setting from the Siyavula filter configuration.
+    $uniqueuserfield = get_config('filter_siyavula', 'unique_user_field');
+    if (empty($uniqueuserfield)) {
+        // Default to 'email' if the unique user field is not set.
+        $uniqueuserfield = 'email';
+    }
+
+    return !empty($user->$uniqueuserfield) ? $user->$uniqueuserfield : $user->email;
+}
+
+/**
+ * Get the external user token for a user.
+ *
+ * @param object $siyavulaconfig Configuration object for Siyavula.
+ * @param string $clientip Client IP address.
+ * @param string $token JWT token for authentication.
+ * @param int $userid User ID (default is 0, which means current user).
+ * @return object Response from the Siyavula API containing the user token.
+ */
+function siyavula_get_external_user_token($siyavulaconfig, $clientip, $token, $userid = 0, $uuid = '') {
     global $USER, $CFG;
 
     $curl = curl_init();
 
-    // Check verify user exists.
-    if ($userid == 0) {
-        $email = $USER->email;
-    } else {
-        $user = core_user::get_user($userid);
-        $email = $user->email;
-    }
+    $user = $userid == 0 ? $USER : core_user::get_user($userid);
+    $externaluserid = siyavula_get_external_user_id($siyavulaconfig, $user);
 
-    $apiroute = $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $email . '/token';
+    $apiroute = $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $externaluserid . '/token';
 
     curl_setopt_array($curl, array(
-    CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $email . '/token',
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_ENCODING => "",
-    CURLOPT_MAXREDIRS => 10,
-    CURLOPT_TIMEOUT => 0,
-    CURLOPT_FOLLOWLOCATION => true,
-    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    CURLOPT_CUSTOMREQUEST => "GET",
-    CURLOPT_HTTPHEADER => array('JWT: ' . $token),
+        CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $externaluserid . '/token',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_HTTPHEADER => array('JWT: ' . $token),
     ));
 
     $payload = $token;
@@ -103,47 +129,95 @@ function siyavula_get_external_user_token($siyavulaconfig, $clientip, $token, $u
     curl_close($curl);
 
     if (isset($response->errors)) {
-        return siyavula_create_user($siyavulaconfig, $token);
+
+        $newuser = siyavula_create_user($siyavulaconfig, $token);
+        // Confirm that the user was created successfully.
+        // If the uuid is not empty, the user has already been created and a token fetch was attempted.
+        // Do not retry to avoid an infinite loop.
+        if (!empty($newuser->uuid) && empty($uuid)) {
+            return siyavula_get_external_user_token($siyavulaconfig, $clientip, $token, $userid, $newuser->uuid);
+        }
+
+        return false;
+
     } else {
         return $response;
     }
 }
 
-function siyavula_create_user($siyavulaconfig, $token) {
 
+/**
+ * Create a user in Siyavula.
+ *
+ * Finds the selected user unique field and uses it as the external_user_id.
+ *
+ * @param object $siyavulaconfig Configuration object for Siyavula.
+ * @param string $token JWT token for authentication.
+ * @return object Response from the Siyavula API.
+ */
+function siyavula_create_user($siyavulaconfig, $token) {
     global $USER, $CFG;
 
+    // Load the user's custom profile fields into the $USER object.
+    profile_load_data($USER);
+
+    // Retrieve the unique user field setting from the Siyavula filter configuration.
+    $uniqueuserfield = get_config('filter_siyavula', 'unique_user_field');
+    if (empty($uniqueuserfield)) {
+        // Default to 'email' if the unique user field is not set.
+        $uniqueuserfield = 'email';
+    }
+
     $data = array(
-    'external_user_id' => $USER->email,
-    "role" => "Learner",
-    "name" => $USER->firstname,
-    "surname" => $USER->lastname,
-    "password" => "123456",
-    "grade" => isset($USER->profile['grade']) ? $USER->profile['Grade'] : 1,
-    "country" => $USER->country != '' ? $USER->country : $siyavulaconfig->client_region,
-    "curriculum" => isset($USER->profile['curriculum']) ? $USER->profile['Grade'] : $siyavulaconfig->client_curriculum,
-    'email' => $USER->email,
-    'dialling_code' => '27',
-    'telephone' => $USER->phone1
+        'external_user_id' => !empty($USER->$uniqueuserfield) ? $USER->$uniqueuserfield : $USER->email,
+        "role" => "Learner",
+        "password" => "123456",
+        "grade" => isset($USER->profile['grade']) ? $USER->profile['Grade'] : 1,
+        "curriculum" => isset($USER->profile['curriculum']) ? $USER->profile['Grade'] : $siyavulaconfig->client_curriculum,
+        'email' => $USER->email,
+        'dialling_code' => '27',
     );
 
+    // Prepare the personal data to be sent to the Siyavula API.
+    $personalfields = get_config('filter_siyavula', 'personal_fields') ?: '';
+    if (!empty($personalfields)) {
+        // If personal fields are set, use them to populate the user data.
+        array_map(function($field) use (&$data, $USER) {
+            $data[$field] = $USER->$field ?? '';
+        }, explode(',', $personalfields));
+    }
+
+    // Rename fields to match Siyavula API requirements.
+    $rename = ['name' => 'firstname', 'surname' => 'lastname', 'telephone' => 'phone1'];
+    foreach ($rename as $newkey => $oldkey) {
+        if (isset($data[$oldkey])) {
+            $data[$newkey] = $data[$oldkey];
+            unset($data[$oldkey]);
+        }
+    }
+
+    // Set the country field, defaulting to the configured region if not set.
+    $data["country"] = ($USER->country != '' && in_array('country', $personalfields))
+        ? $USER->country : '';
+    if ($data['country'] == '' && $siyavulaconfig->client_region != "INTL") {
+        $data['country'] = $siyavulaconfig->client_region;
+    }
+
     $payload = json_encode($data);
-
     $curl = curl_init();
-
     $apiroute = $siyavulaconfig->url_base . "api/siyavula/v1/user";
 
     curl_setopt_array($curl, array(
-    CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/user",
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_ENCODING => "",
-    CURLOPT_MAXREDIRS => 10,
-    CURLOPT_TIMEOUT => 0,
-    CURLOPT_FOLLOWLOCATION => true,
-    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    CURLOPT_CUSTOMREQUEST => "POST",
-    CURLOPT_POSTFIELDS => $payload,
-    CURLOPT_HTTPHEADER => array('JWT: ' . $token),
+        CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/user",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "POST",
+        CURLOPT_POSTFIELDS => $payload,
+        CURLOPT_HTTPHEADER => array('JWT: ' . $token),
     ));
 
     $response = curl_exec($curl);
@@ -278,7 +352,7 @@ function validate_params($data) {
     }
 
     $externaltoken = siyavula_get_external_user_token($siyavulaconfig, $clientip, $gettoken, $userid = 0);
-    if ($externaltoken->token == null) {
+    if (empty($externaltoken->token)) {
         $message .= '<span>' . get_string('token_externalerror', 'filter_siyavula') . '</span><br>';
     } else {
         $success  .= '<span class="token_success">' . get_string('token_externalgenerated', 'filter_siyavula') . '</span><br>';
@@ -306,6 +380,9 @@ function saved_data($data) {
 
     foreach ($newdata as $name => $value) {
         $name = str_replace('s_filter_siyavula_', '', $name);
+        if (is_array($value)) {
+            continue;
+        }
         set_config($name, $value, 'filter_siyavula');
     }
 }
@@ -314,15 +391,15 @@ function get_list_users($siyavulaconfig, $token) {
     $curl = curl_init();
 
     curl_setopt_array($curl, array(
-    CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/users",
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_ENCODING => "",
-    CURLOPT_MAXREDIRS => 10,
-    CURLOPT_TIMEOUT => 0,
-    CURLOPT_FOLLOWLOCATION => true,
-    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    CURLOPT_CUSTOMREQUEST => "GET",
-    CURLOPT_HTTPHEADER => array('JWT: ' . $token),
+        CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/users",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_HTTPHEADER => array('JWT: ' . $token),
     ));
 
     $response = curl_exec($curl);
@@ -344,15 +421,15 @@ function test_get_external_user_token($siyavulaconfig, $clientip, $token, $email
     $apiroute = $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $email . '/token';
 
     curl_setopt_array($curl, array(
-    CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $email . '/token',
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_ENCODING => "",
-    CURLOPT_MAXREDIRS => 10,
-    CURLOPT_TIMEOUT => 0,
-    CURLOPT_FOLLOWLOCATION => true,
-    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    CURLOPT_CUSTOMREQUEST => "GET",
-    CURLOPT_HTTPHEADER => array('JWT: ' . $token),
+        CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $email . '/token',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_HTTPHEADER => array('JWT: ' . $token),
     ));
 
     $payload = $token;
