@@ -1,4 +1,4 @@
-define(["jquery", "core/ajax", "core_filters/events", 'filter_mathjaxloader/loader'], function ($, Ajax, FilterEvents, MathJaxLoader) {
+define(["jquery", "core/ajax", "core_filters/events"], function ($, Ajax, FilterEvents) {
 
     // Selectors and other strings defined here.
     const SELECTORS = {
@@ -73,7 +73,15 @@ define(["jquery", "core/ajax", "core_filters/events", 'filter_mathjaxloader/load
             if (!isSupported && window.MathJax.version === undefined) {
                 // Make the mathjax filter work with the Siyavula filter.
                 // It helps to make the mathjax.hub is initialized.
-                MathJaxLoader.loadMathJax();
+                const mathJaxUrl = 'https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js';
+                new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    script.src = mathJaxUrl;
+                    document.getElementsByTagName('head')[0].appendChild(script);
+                });
             }
 
             mathJaxFilterByEvents(isSupported);
