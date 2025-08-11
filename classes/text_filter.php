@@ -263,7 +263,7 @@ class text_filter extends \siyavula_moodle_text_filter {
         if (!empty($result)) {
             // Current version is Moodle 4.0 or higher use the event types. Otherwise use the older versions.
             if ($CFG->version >= 2022041912) {
-                $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init');
+                $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init', ['issupported' => $CFG->version <= 2025040100]);
             } else {
                 $PAGE->requires->js_call_amd('filter_siyavula/initmathjax-backward', 'init');
             }
