@@ -231,6 +231,9 @@ function siyavula_create_user($siyavulaconfig, $token) {
     }
 
     curl_close($curl);
+
+    filter_siyavula_set_user_school($siyavulaconfig, $token, $response);
+
     return $response;
 }
 
@@ -504,4 +507,100 @@ function get_activity_response($token, $usertoken, $baseurl, $activityid, $respo
     curl_close($curl);
 
     return $response;
+}
+
+/**
+ * Get the list of schools from the Siyavula.
+ *
+ * @param object $siyavulaconfig Configuration object for Siyavula.
+ * @param string $token JWT token for authentication.
+ * @return array List of schools or an empty array if no schools are found.
+ */
+function filter_siyavula_get_clientschools($siyavulaconfig, $token) {
+
+    if (empty($token)) {
+        throw new moodle_exception('siyavula_token_error', 'filter_siyavula');
+    }
+
+    $curl = new curl();
+    $options = array(
+        'CURLOPT_RETURNTRANSFER' => true,
+        'CURLOPT_HTTPHEADER' => array('JWT: '.$token),
+        'CURLOPT_TIMEOUT' => 0,
+        'CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1,
+    );
+    $schools = $siyavulaconfig->url_base . "api/siyavula/v1/schools";
+    $result = $curl->get($schools, [], $options);
+
+    if ($msg = $curl->error) {
+        throw new moodle_exception('curlerror', 'mod_siyavula', '', $msg);
+    }
+
+    $response = json_decode($result);
+
+    if (isset($response->errors)) {
+        foreach ($response->errors as $error) {
+            \core\notification::error('Siyavula curriculum api: ' . $error->message);
+        }
+        return (object)[];
+    }
+
+    if (!empty($response)) {
+        $schoollist = array_combine(array_column($response, 'id'), array_column($response, 'name'));
+        return $schoollist;
+    }
+
+    return [];
+}
+
+/**
+ * Set the user's school in Siyavula.
+ *
+ * @param object $siyavulaconfig Configuration object for Siyavula.
+ * @param string $token JWT token for authentication.
+ * @param object $response Response from the Siyavula API.
+ * @return array List of schools or an empty array if no schools are found.
+ */
+function filter_siyavula_set_user_school($siyavulaconfig, $token, $response) {
+
+    if (empty($token)) {
+        throw new moodle_exception('siyavula_token_error', 'filter_siyavula');
+    }
+
+    // echo "<pre>";print_r($response);
+
+    $curl = new curl();
+    $options = array(
+        'CURLOPT_RETURNTRANSFER' => true,
+        'CURLOPT_HTTPHEADER' => array('JWT: '.$token),
+        'CURLOPT_TIMEOUT' => 0,
+        'CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1,
+    );
+
+    $externaluserid = $response->external_user_id ?? '';
+    $schoolid = $siyavulaconfig->client_school_id ?? '';
+
+    if (empty($externaluserid) || empty($schoolid)) {
+        return false;
+    }
+
+    $schoolurl = $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $externaluserid ."/school/" . $schoolid;
+
+    $result = $curl->put($schoolurl, [], $options);
+
+    if ($msg = $curl->error) {
+        throw new moodle_exception('curlerror', 'mod_siyavula', '', $msg);
+    }
+
+    $schoolresponse = json_decode($result);
+
+
+    if (isset($schoolresponse->errors)) {
+        foreach ($schoolresponse->errors as $error) {
+            \core\notification::error('Siyavula curriculum api: ' . $error->message);
+        }
+        return (object)[];
+    }
+
+    return [];
 }

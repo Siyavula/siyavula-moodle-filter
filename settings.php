@@ -142,6 +142,15 @@ $personalfields = new admin_setting_configmulticheckbox(
     $userfields
 );
 
+// User school field.
+$userschool = new admin_setting_configselect(
+    'filter_siyavula/userschool',
+    get_string('siyavula_userschool', 'filter_siyavula'),
+    get_string('siyavula_userschool_desc', 'filter_siyavula'),
+    'institution',
+    $userfields
+);
+
 // Only if the current page is the filter siyavula settings.
 if ($id == 'filtersettingsiyavula') {
     $clientip = $_SERVER['REMOTE_ADDR'];
@@ -177,6 +186,17 @@ if ($id == 'filtersettingsiyavula') {
 
         $settings->add($listusers);
     }
+
+    // Client school field.
+    $clientschools = filter_siyavula_get_clientschools($siyavulaconfig, $gettoken);
+    $clientschool = new admin_setting_configselect(
+        'filter_siyavula/client_school_id',
+        get_string('siyavula_userschool', 'filter_siyavula'),
+        get_string('siyavula_userschool_desc', 'filter_siyavula'),
+        '',
+        $clientschools
+    );
+    $settings->add($clientschool);
 
     // Show messages if filter response correct create Token and external toke....
     if (get_config('filter_siyavula', 'admin_show_siyavula_notify_error') == true) {
