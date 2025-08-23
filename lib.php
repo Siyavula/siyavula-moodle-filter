@@ -243,7 +243,7 @@ function siyavula_debug_message($namefunction, $apiroute, $payload, $response, $
 
     $id = optional_param('section', '', PARAM_TEXT);
     $clientip = $_SERVER['REMOTE_ADDR'];
-    $payloadarray = json_decode($payload, true);
+    $payloadarray = $payload ? json_decode($payload, true) : [];
     $errors = '';
 
     $payloadname = '';
@@ -519,7 +519,8 @@ function get_activity_response($token, $usertoken, $baseurl, $activityid, $respo
 function filter_siyavula_get_clientschools($siyavulaconfig, $token) {
 
     if (empty($token)) {
-        throw new moodle_exception('siyavula_token_error', 'filter_siyavula');
+        debugging(get_string('token_and_token_external', 'filter_siyavula'), DEBUG_NORMAL);
+        return false;
     }
 
     $curl = new curl();
@@ -564,10 +565,9 @@ function filter_siyavula_get_clientschools($siyavulaconfig, $token) {
 function filter_siyavula_set_user_school($siyavulaconfig, $token, $response) {
 
     if (empty($token)) {
-        throw new moodle_exception('siyavula_token_error', 'filter_siyavula');
+        debugging(get_string('token_and_token_external', 'filter_siyavula'), DEBUG_NORMAL);
+        return false;
     }
-
-    // echo "<pre>";print_r($response);
 
     $curl = new curl();
     $options = array(
