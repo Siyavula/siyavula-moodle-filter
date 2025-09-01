@@ -123,7 +123,7 @@ $uniqueuserfield = new admin_setting_configselect(
     'filter_siyavula/unique_user_field',
     get_string('siyavula_unique_user_field', 'filter_siyavula'),
     get_string('siyavula_unique_user_field_desc', 'filter_siyavula'),
-    'username',
+    'email',
     $userfields
 );
 
