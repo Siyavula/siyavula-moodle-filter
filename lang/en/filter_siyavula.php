@@ -49,7 +49,9 @@ $string['siyavula_showretry'] = 'Show "Try Again" button';
 $string['siyavula_showlivepreview'] = 'Show Live Preview';
 
 $string['siyavula_unique_user_field'] = 'Unique user field';
-$string['siyavula_unique_user_field_desc'] = 'Unique user field used to identify users in Siyavula. This field will be linked as external_userid in the Siyavula API. <br> If the selected field is empty, the user\'s email address will be used as a fallback.';
+$string['siyavula_unique_user_field_desc'] = 'Unique user field used to identify users in Siyavula. This field will be linked as external_userid in the Siyavula API.
+<br> If the selected field is empty, the user\'s email address will be used as a fallback.
+<br> <p class="text-danger font-weight-bold">Note: Changing the unique user field after users have been synced may cause conflicts when creating user tokens in Siyavula.</p>';
 $string['siyavula_personal_fields'] = 'Personal fields';
 $string['siyavula_personal_fields_desc'] = 'Personal fields to be shared with Siyavula. These fields will be used to create or update user profiles in the Siyavula API.';
 $string['siyavula_userschool'] = 'User school field';
