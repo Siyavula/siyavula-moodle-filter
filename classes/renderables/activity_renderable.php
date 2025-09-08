@@ -24,4 +24,5 @@ class activity_renderable implements \renderable {
     public $activitytype;
     public $showlivepreview;
     public $templatelist;
+    public $uniqueid;
 }

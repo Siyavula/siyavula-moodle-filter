@@ -39,13 +39,14 @@ if (class_exists('\core_filters\text_filter')) {
 class text_filter extends \siyavula_moodle_text_filter {
 
     public function get_activity_type($text) {
+
         if (strpos($text, '[[syp') !== false) {
             $activitytype = 'practice';
         } else if (strpos($text, '[[sya') !== false)  {
             $activitytype = 'assignment';
         } else if (strpos($text, '[[sy') !== false) {
             if (strpos($text, ',') == true) {
-                $activitytype = 'standaloneList';
+                $activitytype = 'standalone-list';
             } else {
                 $activitytype = 'standalone';
             }
@@ -136,11 +137,18 @@ class text_filter extends \siyavula_moodle_text_filter {
             exit();
         }
 
-        $activitytype = $this->get_activity_type($text);
-        if (!$activitytype) {
+        // Fetch the list of shortcodes.
+        $matches = [];
+        preg_match_all('/\[\[(sy(?:a|p)?)-([0-9]+(?:\s*,\s*[0-9]+)*)\]\]/', $text, $matches);
+
+        if (empty($matches[0])) {
             return $text;
         }
 
+        // If the shortcode is found, we can proceed.
+        $codeslist = $matches[0];
+
+        // Siyavula Config.
         $clientip = $_SERVER['REMOTE_ADDR'];
         $siyavulaconfig = get_config('filter_siyavula');
         $token = siyavula_get_user_token($siyavulaconfig, $clientip);
@@ -149,6 +157,47 @@ class text_filter extends \siyavula_moodle_text_filter {
         $showlivepreview = $siyavulaconfig->showlivepreview;
         $baseurl = $siyavulaconfig->url_base;
 
+        $config = (object) [
+            'token' => $token,
+            'usertoken' => $usertoken->token,
+            'baseurl' => $baseurl,
+            'showlivepreview' => $showlivepreview,
+            'showbtnretry' => $showbtnretry,
+            'wwwroot' => $CFG->wwwroot,
+        ];
+
+        $activitieslist = [];
+
+        foreach ($codeslist as $code) {
+            $text = $this->render_activity($activitieslist, $code, $text, $config);
+        }
+
+        $renderer = $PAGE->get_renderer('filter_siyavula');
+        $text .= $renderer->render_assets($activitieslist, $config);
+
+        return $text;
+    }
+
+    /**
+     * Render the activity based on the activity code.
+     *
+     * Store the activity renderable in the activities list for later js rendering.
+     *
+     * @param array $activitieslist List of activities to render.
+     * @param string $code The shortcode to process.
+     * @param string $text The original text containing the shortcode.
+     * @param object $config Configuration object containing token and base URL.
+     * @return string Rendered HTML for the activity.
+     */
+    public function render_activity(array &$activitieslist, $code, $text) {
+
+        global $OUTPUT, $USER, $PAGE, $CFG, $DB;
+
+        $activitytype = $this->get_activity_type($code);
+
+        if (!$activitytype) {
+            return $text;
+        }
 
         $result = '';
 
@@ -156,43 +205,36 @@ class text_filter extends \siyavula_moodle_text_filter {
             list($templateid, $randomseed) = $this->get_standalone_activity_data($text);
 
             $renderer = $PAGE->get_renderer('filter_siyavula');
+
             $activityrenderable = new standalone_activity_renderable();
-            $activityrenderable->wwwroot = $CFG->wwwroot;
-            $activityrenderable->baseurl = $baseurl;
-            $activityrenderable->showlivepreview = $showlivepreview;
-            $activityrenderable->token = $token;
-            $activityrenderable->usertoken = $usertoken->token;
             $activityrenderable->activitytype = $activitytype;
             $activityrenderable->templateid = $templateid;
             $activityrenderable->randomseed = $randomseed;
+            $activityrenderable->uniqueid = 'sy-' . $templateid . '-' . $randomseed . '-' . time();
 
             $result .= $renderer->render_standalone_activity($activityrenderable);
-        } else if ($activitytype == 'standaloneList') {
+
+        } else if ($activitytype == 'standalone-list') {
+
             $templatelist = $this->get_standalone_list_activity_data($text);
 
             $renderer = $PAGE->get_renderer('filter_siyavula');
             $activityrenderable = new standalone_activity_renderable();
-            $activityrenderable->wwwroot = $CFG->wwwroot;
-            $activityrenderable->baseurl = $baseurl;
-            $activityrenderable->showlivepreview = $showlivepreview;
-            $activityrenderable->token = $token;
-            $activityrenderable->usertoken = $usertoken->token;
+
             $activityrenderable->activitytype = $activitytype;
             $activityrenderable->templatelist = json_encode($templatelist);
+            $activityrenderable->uniqueid = 'sy-' . implode('-', array_column($templatelist, 0)) . '-' . time();
 
             $result .= $renderer->render_standalone_activity($activityrenderable);
         } else if ($activitytype == 'practice') {
             $sectionid = $this->get_practice_activity_data($text);
-
             $renderer = $PAGE->get_renderer('filter_siyavula');
+
             $activityrenderable = new practice_activity_renderable();
-            $activityrenderable->wwwroot = $CFG->wwwroot;
-            $activityrenderable->baseurl = $baseurl;
-            $activityrenderable->showlivepreview = $showlivepreview;
-            $activityrenderable->token = $token;
-            $activityrenderable->usertoken = $usertoken->token;
+
             $activityrenderable->activitytype = $activitytype;
             $activityrenderable->sectionid = $sectionid;
+            $activityrenderable->uniqueid = 'sy-' . $sectionid . '-' . time();
 
             $result .= $renderer->render_practice_activity($activityrenderable);
         } else if ($activitytype == 'assignment') {
@@ -200,39 +242,28 @@ class text_filter extends \siyavula_moodle_text_filter {
 
             $renderer = $PAGE->get_renderer('filter_siyavula');
             $activityrenderable = new assignment_activity_renderable();
-            $activityrenderable->wwwroot = $CFG->wwwroot;
-            $activityrenderable->baseurl = $baseurl;
-            $activityrenderable->showlivepreview = $showlivepreview;
-            $activityrenderable->token = $token;
-            $activityrenderable->usertoken = $usertoken->token;
+
             $activityrenderable->activitytype = $activitytype;
             $activityrenderable->assignmentid = $assignmentid;
+            $activityrenderable->uniqueid = 'sy-' . $assignmentid . '-' . time();
 
             $result .= $renderer->render_assignment_activity($activityrenderable);
         }
 
-        // TODO: Refactor this (LC)
-        // Strip HTML
-        $newtext = strip_tags($text);
-        if ($activitytype == 'practice') {
-            $re = '/\[{2}[syp\-\d{1,},?|]*\]{2}/m';
-        } else if ($activitytype == 'assignment') {
-            $re = '/\[{2}[sya\-\d{1,},?|]*\]{2}/m';
-        } else {
-            $re = '/\[{2}[sy\-\d{1,},?|]*\]{2}/m';
+        if (!empty($activityrenderable)) {
+            array_push($activitieslist, $activityrenderable);
         }
-        // Find the [[sy{p}-]] filter
-        preg_match_all($re, $newtext, $matches);
+
         // Define the correct match
-        $text_to_replace_render = $matches[0][0];
+        // $text_to_replace_render = $matches[0][0];
         // Replace the raw filter text with the question's HTML
-        $result = str_replace($text_to_replace_render, $result, $text);
+        $result = str_replace($code, $result, $text);
 
         // Render questions not apply format siyavula.
         if (!empty($result)) {
             // Current version is Moodle 4.0 or higher use the event types. Otherwise use the older versions.
             if ($CFG->version >= 2022041912) {
-                $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init');
+                $PAGE->requires->js_call_amd('filter_siyavula/initmathjax', 'init', ['issupported' => $CFG->version <= 2025040100]);
             } else {
                 $PAGE->requires->js_call_amd('filter_siyavula/initmathjax-backward', 'init');
             }

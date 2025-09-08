@@ -1,0 +1,61 @@
+<link rel="stylesheet" href="{{ config.baseurl }}static/themes/emas/siyavula-api/siyavula-api.min.css" />
+<link rel="stylesheet" href="{{ config.wwwroot }}/filter/siyavula/styles/general.css" />
+<script src="{{ config.baseurl }}static/themes/emas/siyavula-api/js/v2/siyavula-api.js"></script>
+
+{{> filter_siyavula/mathjax_config}}
+
+<script type="text/javascript">
+
+    const siyavulaManager = new Siyavula.SiyavulaActivityManager();
+
+    if (typeof window.siyavulaActivities === 'undefined') {
+        window.siyavulaActivities = {};
+    }
+
+    const config = {
+        baseUrl: "{{ config.baseurl }}",
+        token: "{{ config.token }}",
+        userToken: "{{ config.usertoken }}",
+        showLivePreview: '{{ config.showlivepreview }}',
+    };
+
+    const initializeActivities = async () => {
+        {{#activitieslist}}
+            var activityType = '{{ activitytype }}';
+            var additionalConfig = {};
+            {{#assignmentid}} additionalConfig['assignmentId'] = {{assignmentid}};{{/assignmentid}}
+            {{#sectionid}} additionalConfig['sectionId'] = {{sectionid}}; {{/sectionid}}
+            {{#templateid}} additionalConfig['templateId'] = {{templateid}}; {{/templateid}}
+            {{#randomseed}} additionalConfig['randomSeed'] = {{randomseed}}; {{/randomseed}}
+            {{#templatelist}} additionalConfig['templateList'] = {{templatelist}}; {{/templatelist}}
+            {{#activityid}} additionalConfig['activityId'] = '{{activityid}}'; {{/activityid}}
+            {{#responseid}} additionalConfig['responseId'] = '{{responseid}}'; {{/responseid}}
+
+            try {
+                const uniqueid = "#{{ uniqueid }}";
+                const standalone = await siyavulaManager.createActivity(
+                    uniqueid,
+                    config,
+                    activityType,
+                    additionalConfig
+                );
+
+                // Store the standalone activity in the global object for later use.
+                // It helps to manage the activities and their states in siyavula module.
+                window.siyavulaActivities[uniqueid] = standalone;
+
+            } catch (error) {
+                console.error("Failed to initialize activities:", error);
+            }
+
+        {{/activitieslist}}
+    };
+
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+        initializeActivities();
+    });
+
+
+</script>

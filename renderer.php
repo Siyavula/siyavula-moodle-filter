@@ -23,6 +23,7 @@ use filter_siyavula\renderables\question_feedback_renderable;
 use filter_siyavula\renderables\assignment_activity_renderable;
 
 class filter_siyavula_renderer extends plugin_renderer_base {
+
     public function render_practice_activity(practice_activity_renderable $practiceactivityrenderable) {
         return $this->render_from_template('filter_siyavula/activity', $practiceactivityrenderable);
     }
@@ -45,5 +46,48 @@ class filter_siyavula_renderer extends plugin_renderer_base {
 
     public function render_question_feedback(question_feedback_renderable $questionfeedbackrenderable) {
         return $this->render_from_template('filter_siyavula/question_feedback', $questionfeedbackrenderable);
+    }
+
+    /**
+     * Get the token data for the Siyavula activities.
+     *
+     * @return object Configuration object containing token and base URL.
+     */
+    public function get_token_data() {
+        global $CFG;
+
+        $clientip = $_SERVER['REMOTE_ADDR'];
+        $siyavulaconfig = get_config('filter_siyavula');
+        $baseurl = $siyavulaconfig->url_base;
+        $token = siyavula_get_user_token($siyavulaconfig, $clientip);
+        $usertoken = siyavula_get_external_user_token($siyavulaconfig, $clientip, $token);
+
+        $config = (object) [
+            'token' => $token,
+            'usertoken' => $usertoken?->token,
+            'baseurl' => $baseurl,
+            'wwwroot' => $CFG->wwwroot,
+        ];
+
+        return $config;
+    }
+
+    /**
+     * Render the scripts for Siyavula activities.
+     *
+     * @param array $activitieslist List of activities to render.
+     * @param object|null $config Configuration object, if null will use default config.
+     * @return string Rendered HTML for the assets.
+     */
+    public function render_assets(array $activitieslist, $config=null) {
+
+        if ($config === null) {
+            $config = $this->get_token_data();
+        }
+
+        return $this->render_from_template('filter_siyavula/assets', [
+            'activitieslist' => $activitieslist,
+            'config' => $config
+        ]);
     }
 }
