@@ -101,6 +101,10 @@ $debugenabled = new admin_setting_configselect(
 
 
 $corefields = \core_user::AUTHSYNCFIELDS;
+//add username at the beginning
+if (!in_array('username', $corefields)) {
+    array_unshift($corefields, 'username');
+}
 $key = array_search('lang', $corefields);
 unset($corefields[$key]);
 $corefieldslist = array_combine(
