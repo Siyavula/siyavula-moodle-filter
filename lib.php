@@ -180,11 +180,12 @@ function siyavula_create_user($siyavulaconfig, $token) {
 
     // Prepare the personal data to be sent to the Siyavula API.
     $personalfields = get_config('filter_siyavula', 'personal_fields') ?: '';
-    if (!empty($personalfields)) {
+    $personalfieldsarray = !empty($personalfields) ? explode(',', $personalfields) : [];
+    if (!empty($personalfieldsarray)) {
         // If personal fields are set, use them to populate the user data.
         array_map(function($field) use (&$data, $USER) {
             $data[$field] = $USER->$field ?? '';
-        }, explode(',', $personalfields));
+        }, $personalfieldsarray);
     }
 
     // Rename fields to match Siyavula API requirements.
@@ -197,7 +198,7 @@ function siyavula_create_user($siyavulaconfig, $token) {
     }
 
     // Set the country field, defaulting to the configured region if not set.
-    $data["country"] = ($USER->country != '' && in_array('country', $personalfields))
+    $data["country"] = ($USER->country != '' && in_array('country', $personalfieldsarray))
         ? $USER->country : '';
     if ($data['country'] == '' && $siyavulaconfig->client_region != "INTL") {
         $data['country'] = $siyavulaconfig->client_region;
