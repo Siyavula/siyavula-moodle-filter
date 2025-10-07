@@ -106,17 +106,20 @@ if (!in_array('username', $corefields)) {
     array_unshift($corefields, 'username');
 }
 $key = array_search('lang', $corefields);
-unset($corefields[$key]);
+if ($key !== false) {
+    unset($corefields[$key]);
+}
 $corefieldslist = array_combine(
     $corefields,
     array_map(fn($v) => get_string($v, 'core'), $corefields)
 );
 
 $allcustomfields = profile_get_custom_fields();
-$customfieldname = array_combine(
-    array_map(fn($v) => 'profile_field_'. $v, array_column($allcustomfields, 'shortname')),
-    array_column($allcustomfields, 'name')
-);
+$customfieldkeys = array_map(fn($v) => 'profile_field_'. $v, array_column($allcustomfields, 'shortname'));
+$customfieldvalues = array_column($allcustomfields, 'name');
+$customfieldname = !empty($customfieldkeys) && !empty($customfieldvalues)
+    ? array_combine($customfieldkeys, $customfieldvalues)
+    : [];
 
 $userfields = array_merge(
     $corefieldslist,
