@@ -548,7 +548,9 @@ function filter_siyavula_get_clientschools($siyavulaconfig, $token) {
     }
 
     if (!empty($response)) {
-        $schoollist = array_combine(array_column($response, 'id'), array_column($response, 'name'));
+        $ids = array_column($response, 'id');
+        $names = array_column($response, 'name');
+        $schoollist = !empty($ids) && !empty($names) ? array_combine($ids, $names) : [];
         return $schoollist;
     }
 
