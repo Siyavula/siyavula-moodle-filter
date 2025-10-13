@@ -129,19 +129,26 @@ class text_filter extends \siyavula_moodle_text_filter {
 
         global $OUTPUT, $USER, $PAGE, $CFG, $DB;
 
-        // Verify if user not authenticated.
-        $userauth = false;
-        if (isguestuser() || $USER == null) {
-            $userauth = true;
-            header('Location: ' . $CFG->wwwroot . '/login/index.php');
-            exit();
-        }
-
         // Fetch the list of shortcodes.
         $matches = [];
         preg_match_all('/\[\[(sy(?:a|p)?)-([0-9]+(?:\s*,\s*[0-9]+)*)\]\]/', $text, $matches);
 
         if (empty($matches[0])) {
+            return $text;
+        }
+
+        // If user is not authenticated, show a message instead of rendering activities.
+        if (isguestuser() || $USER == null) {
+            $loginurl = $CFG->wwwroot . '/login/index.php';
+            $message = '<div class="alert alert-info" role="alert">' .
+                       '<strong>Siyavula Activity:</strong> Please <a href="' . $loginurl . '">log in</a> to access this content.' .
+                       '</div>';
+
+            // Replace all shortcodes with the login message.
+            foreach ($matches[0] as $code) {
+                $text = str_replace($code, $message, $text);
+            }
+
             return $text;
         }
 
