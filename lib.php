@@ -172,8 +172,8 @@ function siyavula_create_user($siyavulaconfig, $token) {
         'external_user_id' => !empty($USER->$uniqueuserfield) ? $USER->$uniqueuserfield : $USER->email,
         "role" => "Learner",
         "password" => "123456",
-        "grade" => isset($USER->profile['grade']) ? $USER->profile['Grade'] : 1,
-        "curriculum" => isset($USER->profile['curriculum']) ? $USER->profile['Grade'] : $siyavulaconfig->client_curriculum,
+        "grade" => isset($USER->profile['grade']) ? $USER->profile['grade'] : 1,
+        "curriculum" => isset($USER->profile['curriculum']) ? $USER->profile['curriculum'] : $siyavulaconfig->client_curriculum,
         'email' => $USER->email,
         'dialling_code' => '27',
     );
