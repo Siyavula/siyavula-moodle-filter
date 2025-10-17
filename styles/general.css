@@ -23,7 +23,36 @@ body, html {
     float: right;
 }
 
-.tabs-toc input.toc {
+/* Fallback styles for Siyavula radio buttons when icon font fails to load */
+.sv-radio-button__box {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #848484;
+    border-radius: 50%;
+    position: relative;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+.sv-radio-button__input:checked + .sv-radio-button__box {
+    border-color: #008bb2;
+}
+
+.sv-radio-button__input:checked + .sv-radio-button__box::after {
+    content: '';
+    display: block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #008bb2;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+input.toc {
     position: absolute;
     opacity: 0;
     z-index: -1;
