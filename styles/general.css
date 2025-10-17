@@ -23,7 +23,7 @@ body, html {
     float: right;
 }
 
-input.toc {
+.tabs-toc input.toc {
     position: absolute;
     opacity: 0;
     z-index: -1;
