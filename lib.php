@@ -17,46 +17,110 @@
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/adminlib.php');
 
-function siyavula_get_user_token($siyavulaconfig, $clientip) {
-    global $USER, $PAGE, $CFG;
+/**
+ * Make an API request to Siyavula using Moodle's curl wrapper.
+ *
+ * @param object $siyavulaconfig Configuration object for Siyavula.
+ * @param string $endpoint API endpoint (e.g., "api/siyavula/v1/get-token").
+ * @param string $method HTTP method (GET, POST, PUT).
+ * @param array $options Optional parameters:
+ *                       - 'payload': Request payload (will be JSON encoded if array).
+ *                       - 'token': JWT token for authentication.
+ *                       - 'user_token': User token for Authorization header.
+ *                       - 'debug_name': Function name for debug messages.
+ *                       - 'component': Component name for error messages (default: 'filter_siyavula').
+ * @return object|bool Decoded JSON response or false on error.
+ */
+function siyavula_api_request($siyavulaconfig, $endpoint, $method = 'GET', $options = []) {
+    global $CFG, $USER;
 
-    $data = array(
-    'name' => $siyavulaconfig->client_name,
-    'password' => $siyavulaconfig->client_password,
-    'theme' => 'responsive',
-    'region' => $siyavulaconfig->client_region,
-    'curriculum' => $siyavulaconfig->client_curriculum,
-    'client_ip' => $clientip
-    );
+    $curl = new curl();
 
-    $apiroute  = $siyavulaconfig->url_base . "api/siyavula/v1/get-token";
-    $payload = json_encode($data);
+    // Build full URL
+    $url = $siyavulaconfig->url_base . $endpoint;
 
-    $curl = curl_init();
-
-    curl_setopt_array($curl, array(
-    CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/get-token",
-    CURLOPT_RETURNTRANSFER => true,
-    CURLOPT_ENCODING => "",
-    CURLOPT_MAXREDIRS => 10,
-    CURLOPT_TIMEOUT => 0,
-    CURLOPT_FOLLOWLOCATION => true,
-    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-    CURLOPT_CUSTOMREQUEST => "POST",
-    CURLOPT_POSTFIELDS => $payload,
-    ));
-
-    $response = curl_exec($curl);
-    $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    $response = json_decode($response);
-
-    $name = __FUNCTION__;
-
-    if (($siyavulaconfig->debug_enabled == 1 || $CFG->debugdisplay == 1) && $USER->id != 0) {
-        siyavula_debug_message($name, $apiroute, $payload, $response, $httpcode);
+    // Prepare payload
+    $payload = null;
+    if (isset($options['payload'])) {
+        $payload = is_string($options['payload']) ? $options['payload'] : json_encode($options['payload']);
     }
 
-    curl_close($curl);
+    // Build headers
+    $headers = [];
+    if (isset($options['token'])) {
+        $headers[] = 'JWT: ' . $options['token'];
+    }
+    if (isset($options['user_token'])) {
+        $headers[] = 'Authorization: JWT ' . $options['user_token'];
+    }
+
+    // SSL verification: only disable if explicitly configured (defaults to secure)
+    $ssl_verify = empty($CFG->siyavula_disable_ssl_verify) ? 1 : 0;
+
+    // Set curl options
+    $curloptions = array(
+        'CURLOPT_RETURNTRANSFER' => true,
+        'CURLOPT_TIMEOUT' => 0,
+        'CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1,
+        'CURLOPT_SSL_VERIFYPEER' => $ssl_verify,
+        'CURLOPT_SSL_VERIFYHOST' => $ssl_verify ? 2 : 0,
+    );
+
+    if (!empty($headers)) {
+        $curloptions['CURLOPT_HTTPHEADER'] = $headers;
+    }
+
+    // Execute request based on method
+    $method = strtoupper($method);
+    if ($method === 'GET') {
+        $result = $curl->get($url, [], $curloptions);
+    } else if ($method === 'POST') {
+        $result = $curl->post($url, $payload, $curloptions);
+    } else if ($method === 'PUT') {
+        $result = $curl->put($url, $payload, $curloptions);
+    } else {
+        debugging('Unsupported HTTP method: ' . $method, DEBUG_DEVELOPER);
+        return false;
+    }
+
+    // Check for curl errors
+    if ($msg = $curl->error) {
+        $component = isset($options['component']) ? $options['component'] : 'filter_siyavula';
+        throw new moodle_exception('curlerror', $component, '', $msg);
+    }
+
+    // Get HTTP code and decode response
+    $httpcode = $curl->info['http_code'] ?? 0;
+    $response = json_decode($result);
+
+    // Debug output if enabled
+    if (isset($options['debug_name']) && isset($siyavulaconfig->debug_enabled) && ($siyavulaconfig->debug_enabled == 1 || $CFG->debugdisplay == 1) && $USER->id != 0) {
+        siyavula_debug_message($options['debug_name'], $url, $payload, $response, $httpcode);
+    }
+
+    return $response;
+}
+
+function siyavula_get_user_token($siyavulaconfig, $clientip) {
+    $data = array(
+        'name' => $siyavulaconfig->client_name,
+        'password' => $siyavulaconfig->client_password,
+        'theme' => 'responsive',
+        'region' => $siyavulaconfig->client_region,
+        'curriculum' => $siyavulaconfig->client_curriculum,
+        'client_ip' => $clientip
+    );
+
+    $response = siyavula_api_request(
+        $siyavulaconfig,
+        "api/siyavula/v1/get-token",
+        'POST',
+        array(
+            'payload' => $data,
+            'debug_name' => __FUNCTION__
+        )
+    );
+
     if (isset($response->token)) {
         return $response->token;
     }
@@ -94,42 +158,22 @@ function siyavula_get_external_user_id($siyavulaconfig, $user) {
  * @return object Response from the Siyavula API containing the user token.
  */
 function siyavula_get_external_user_token($siyavulaconfig, $clientip, $token, $userid = 0, $uuid = '') {
-    global $USER, $CFG;
-
-    $curl = curl_init();
+    global $USER;
 
     $user = $userid == 0 ? $USER : core_user::get_user($userid);
     $externaluserid = siyavula_get_external_user_id($siyavulaconfig, $user);
 
-    $apiroute = $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $externaluserid . '/token';
-
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $externaluserid . '/token',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array('JWT: ' . $token),
-    ));
-
-    $payload = $token;
-    $response = curl_exec($curl);
-    $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    $response = json_decode($response);
-
-    $name = __FUNCTION__;
-
-    if (($siyavulaconfig->debug_enabled == 1 || $CFG->debugdisplay == 1) && $USER->id != 0) {
-        siyavula_debug_message($name, $apiroute, $payload, $response, $httpcode);
-    }
-
-    curl_close($curl);
+    $response = siyavula_api_request(
+        $siyavulaconfig,
+        "api/siyavula/v1/user/" . $externaluserid . '/token',
+        'GET',
+        array(
+            'token' => $token,
+            'debug_name' => __FUNCTION__
+        )
+    );
 
     if (isset($response->errors)) {
-
         $newuser = siyavula_create_user($siyavulaconfig, $token);
         // Confirm that the user was created successfully.
         // If the uuid is not empty, the user has already been created and a token fetch was attempted.
@@ -139,7 +183,6 @@ function siyavula_get_external_user_token($siyavulaconfig, $clientip, $token, $u
         }
 
         return false;
-
     } else {
         return $response;
     }
@@ -204,34 +247,16 @@ function siyavula_create_user($siyavulaconfig, $token) {
         $data['country'] = $siyavulaconfig->client_region;
     }
 
-    $payload = json_encode($data);
-    $curl = curl_init();
-    $apiroute = $siyavulaconfig->url_base . "api/siyavula/v1/user";
-
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/user",
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "POST",
-        CURLOPT_POSTFIELDS => $payload,
-        CURLOPT_HTTPHEADER => array('JWT: ' . $token),
-    ));
-
-    $response = curl_exec($curl);
-    $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    $response = json_decode($response);
-
-    $name = __FUNCTION__;
-
-    if (($siyavulaconfig->debug_enabled == 1 || $CFG->debugdisplay == 1) && $USER->id != 0) {
-        siyavula_debug_message($name, $apiroute, $payload, $response, $httpcode);
-    }
-
-    curl_close($curl);
+    $response = siyavula_api_request(
+        $siyavulaconfig,
+        "api/siyavula/v1/user",
+        'POST',
+        array(
+            'payload' => $data,
+            'token' => $token,
+            'debug_name' => __FUNCTION__
+        )
+    );
 
     filter_siyavula_set_user_school($siyavulaconfig, $token, $response);
 
@@ -392,58 +417,30 @@ function saved_data($data) {
 }
 
 function get_list_users($siyavulaconfig, $token) {
-    $curl = curl_init();
-
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/users",
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array('JWT: ' . $token),
-    ));
-
-    $response = curl_exec($curl);
-
-    $response = json_decode($response);
+    $response = siyavula_api_request(
+        $siyavulaconfig,
+        "api/siyavula/v1/users",
+        'GET',
+        array(
+            'token' => $token
+        )
+    );
 
     // Limit response list users generated with token...
     $limitresult = array_slice((array)$response, 0, 30);
 
-    curl_close($curl);
     return $limitresult;
 }
 
 function test_get_external_user_token($siyavulaconfig, $clientip, $token, $email) {
-    global $USER, $CFG;
-
-    $curl = curl_init();
-
-    $apiroute = $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $email . '/token';
-
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $email . '/token',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => "",
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => "GET",
-        CURLOPT_HTTPHEADER => array('JWT: ' . $token),
-    ));
-
-    $payload = $token;
-    $response = curl_exec($curl);
-    $httpcode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-    $response = json_decode($response);
-
-    $name = __FUNCTION__;
-
-    curl_close($curl);
+    $response = siyavula_api_request(
+        $siyavulaconfig,
+        "api/siyavula/v1/user/" . $email . '/token',
+        'GET',
+        array(
+            'token' => $token
+        )
+    );
 
     if (isset($response->errors)) {
         return siyavula_create_user($siyavulaconfig, $token);
@@ -453,59 +450,43 @@ function test_get_external_user_token($siyavulaconfig, $clientip, $token, $email
 }
 
 function get_activity_standalone($questionid, $token, $external_token, $baseurl, $randomseed){
-    global $USER, $CFG;
-
     $data = array(
         'template_id' => $questionid,
         'random_seed'  => $randomseed,
     );
 
-    $payload = json_encode($data);
+    // Use a temporary config object with the baseurl
+    $tempconfig = new stdClass();
+    $tempconfig->url_base = $baseurl;
 
-    $curl = curl_init();
-
-    curl_setopt_array($curl, array(
-      CURLOPT_URL => $baseurl.'api/siyavula/v1/activity/create/standalone',
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_ENCODING => "",
-      CURLOPT_MAXREDIRS => 10,
-      CURLOPT_TIMEOUT => 0,
-      CURLOPT_FOLLOWLOCATION => true,
-      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-      CURLOPT_CUSTOMREQUEST => "POST",
-      CURLOPT_POSTFIELDS => $payload,
-      CURLOPT_HTTPHEADER => array('JWT: ' .$token, 'Authorization: JWT ' .$external_token),
-    ));
-
-    $response = curl_exec($curl);
-    $response = json_decode($response);
-
-    curl_close($curl);
+    $response = siyavula_api_request(
+        $tempconfig,
+        'api/siyavula/v1/activity/create/standalone',
+        'POST',
+        array(
+            'payload' => $data,
+            'token' => $token,
+            'user_token' => $external_token
+        )
+    );
 
     return $response;
 }
 
 function get_activity_response($token, $usertoken, $baseurl, $activityid, $responseid) {
-    global $USER, $CFG;
+    // Use a temporary config object with the baseurl
+    $tempconfig = new stdClass();
+    $tempconfig->url_base = $baseurl;
 
-    $curl = curl_init();
-
-    curl_setopt_array($curl, array(
-      CURLOPT_URL => $baseurl.'api/siyavula/v1/activity/'.$activityid.'/response/'.$responseid,
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_ENCODING => "",
-      CURLOPT_MAXREDIRS => 10,
-      CURLOPT_TIMEOUT => 0,
-      CURLOPT_FOLLOWLOCATION => true,
-      CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-      CURLOPT_CUSTOMREQUEST => "POST",
-      CURLOPT_HTTPHEADER => array('JWT: ' .$token, 'Authorization: JWT ' .$usertoken),
-    ));
-
-    $response = curl_exec($curl);
-    $response = json_decode($response);
-
-    curl_close($curl);
+    $response = siyavula_api_request(
+        $tempconfig,
+        'api/siyavula/v1/activity/'.$activityid.'/response/'.$responseid,
+        'POST',
+        array(
+            'token' => $token,
+            'user_token' => $usertoken
+        )
+    );
 
     return $response;
 }
@@ -524,21 +505,14 @@ function filter_siyavula_get_clientschools($siyavulaconfig, $token) {
         return false;
     }
 
-    $curl = new curl();
-    $options = array(
-        'CURLOPT_RETURNTRANSFER' => true,
-        'CURLOPT_HTTPHEADER' => array('JWT: '.$token),
-        'CURLOPT_TIMEOUT' => 0,
-        'CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1,
+    $response = siyavula_api_request(
+        $siyavulaconfig,
+        "api/siyavula/v1/schools",
+        'GET',
+        array(
+            'token' => $token
+        )
     );
-    $schools = $siyavulaconfig->url_base . "api/siyavula/v1/schools";
-    $result = $curl->get($schools, [], $options);
-
-    if ($msg = $curl->error) {
-        throw new moodle_exception('curlerror', 'mod_siyavula', '', $msg);
-    }
-
-    $response = json_decode($result);
 
     if (isset($response->errors)) {
         foreach ($response->errors as $error) {
@@ -572,14 +546,6 @@ function filter_siyavula_set_user_school($siyavulaconfig, $token, $response) {
         return false;
     }
 
-    $curl = new curl();
-    $options = array(
-        'CURLOPT_RETURNTRANSFER' => true,
-        'CURLOPT_HTTPHEADER' => array('JWT: '.$token),
-        'CURLOPT_TIMEOUT' => 0,
-        'CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1,
-    );
-
     $externaluserid = $response->external_user_id ?? '';
     $schoolid = $siyavulaconfig->client_school_id ?? '';
 
@@ -587,15 +553,14 @@ function filter_siyavula_set_user_school($siyavulaconfig, $token, $response) {
         return false;
     }
 
-    $schoolurl = $siyavulaconfig->url_base . "api/siyavula/v1/user/" . $externaluserid ."/school/" . $schoolid;
-
-    $result = $curl->put($schoolurl, [], $options);
-
-    if ($msg = $curl->error) {
-        throw new moodle_exception('curlerror', 'mod_siyavula', '', $msg);
-    }
-
-    $schoolresponse = json_decode($result);
+    $schoolresponse = siyavula_api_request(
+        $siyavulaconfig,
+        "api/siyavula/v1/user/" . $externaluserid ."/school/" . $schoolid,
+        'PUT',
+        array(
+            'token' => $token
+        )
+    );
 
 
     if (isset($schoolresponse->errors)) {
