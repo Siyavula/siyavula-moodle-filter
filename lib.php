@@ -60,7 +60,10 @@ function siyavula_api_request($siyavulaconfig, $endpoint, $method = 'GET', $opti
     // Set curl options
     $curloptions = array(
         'CURLOPT_RETURNTRANSFER' => true,
-        'CURLOPT_TIMEOUT' => 0,
+        'CURLOPT_ENCODING' => '',
+        'CURLOPT_MAXREDIRS' => 10,
+        'CURLOPT_TIMEOUT' => 60,
+        'CURLOPT_FOLLOWLOCATION' => true,
         'CURLOPT_HTTP_VERSION' => CURL_HTTP_VERSION_1_1,
         'CURLOPT_SSL_VERIFYPEER' => $ssl_verify,
         'CURLOPT_SSL_VERIFYHOST' => $ssl_verify ? 2 : 0,
