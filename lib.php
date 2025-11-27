@@ -214,13 +214,20 @@ function siyavula_create_user($siyavulaconfig, $token) {
         $uniqueuserfield = 'email';
     }
 
+    // Determine external_user_id - fallback to user ID if unique field is not set
+    $externaluserid = !empty($USER->$uniqueuserfield) ? $USER->$uniqueuserfield : $USER->id;
+
+    // Generate a synthetic email if user doesn't have one
+    // Format: external_user_id@client_name.api
+    $email = !empty($USER->email) ? $USER->email : $externaluserid . '@' . $siyavulaconfig->client_name . '.api';
+
     $data = array(
-        'external_user_id' => !empty($USER->$uniqueuserfield) ? $USER->$uniqueuserfield : $USER->email,
+        'external_user_id' => $externaluserid,
         "role" => "Learner",
         "password" => "123456",
         "grade" => isset($USER->profile['grade']) ? $USER->profile['grade'] : 1,
         "curriculum" => isset($USER->profile['curriculum']) ? $USER->profile['curriculum'] : $siyavulaconfig->client_curriculum,
-        'email' => $USER->email,
+        'email' => $email,
         'dialling_code' => '27',
     );
 
