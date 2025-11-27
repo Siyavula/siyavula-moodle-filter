@@ -130,8 +130,12 @@ class text_filter extends \siyavula_moodle_text_filter {
         global $OUTPUT, $USER, $PAGE, $CFG, $DB;
 
         // Fetch the list of shortcodes.
+        // Supports formats:
+        // [[sy-1234,5678]] - simple list
+        // [[sy-1234|111,sy-5678|222]] - with random seeds
+        // [[sy-1234,sy-5678]] - repeating sy- prefix
         $matches = [];
-        preg_match_all('/\[\[(sy(?:a|p)?)-([0-9]+(?:\s*,\s*[0-9]+)*)\]\]/', $text, $matches);
+        preg_match_all('/\[\[(sy(?:a|p)?-[0-9]+(?:\|[0-9]+)?(?:\s*,\s*sy(?:a|p)?-[0-9]+(?:\|[0-9]+)?)*)\]\]/', $text, $matches);
 
         if (empty($matches[0])) {
             return $text;
