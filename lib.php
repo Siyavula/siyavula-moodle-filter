@@ -214,19 +214,36 @@ function siyavula_create_user($siyavulaconfig, $token) {
         $uniqueuserfield = 'email';
     }
 
+    // Determine external_user_id - fallback to user ID if unique field is not set
+    $externaluserid = !empty($USER->$uniqueuserfield) ? $USER->$uniqueuserfield : $USER->id;
+
+    // Get personal fields configuration to check if email should be shared
+    $personalfields = get_config('filter_siyavula', 'personal_fields') ?: '';
+    $personalfieldsarray = !empty($personalfields) ? explode(',', $personalfields) : [];
+    $shouldshareemail = in_array('email', $personalfieldsarray);
+
+    // Generate a unique username as fallback
+    // Format: external_user_id.client_name.api
+    $username = $externaluserid . '.' . $siyavulaconfig->client_name . '.api';
+
     $data = array(
-        'external_user_id' => !empty($USER->$uniqueuserfield) ? $USER->$uniqueuserfield : $USER->email,
+        'external_user_id' => $externaluserid,
         "role" => "Learner",
         "password" => "123456",
         "grade" => isset($USER->profile['grade']) ? $USER->profile['grade'] : 1,
         "curriculum" => isset($USER->profile['curriculum']) ? $USER->profile['curriculum'] : $siyavulaconfig->client_curriculum,
-        'email' => $USER->email,
         'dialling_code' => '27',
     );
 
-    // Prepare the personal data to be sent to the Siyavula API.
-    $personalfields = get_config('filter_siyavula', 'personal_fields') ?: '';
-    $personalfieldsarray = !empty($personalfields) ? explode(',', $personalfields) : [];
+    // Include email if it should be shared AND user has a valid email
+    // Otherwise use username as the identifier
+    if ($shouldshareemail && !empty($USER->email)) {
+        $data['email'] = $USER->email;
+    } else {
+        $data['username'] = $username;
+    }
+
+    // Prepare additional personal data to be sent to the Siyavula API.
     if (!empty($personalfieldsarray)) {
         // If personal fields are set, use them to populate the user data.
         array_map(function($field) use (&$data, $USER) {
