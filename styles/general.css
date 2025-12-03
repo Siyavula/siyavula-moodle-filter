@@ -21,8 +21,9 @@ body, html {
     float: right;
 }
 
-/* CSS-only radio buttons - no icon font dependency */
-.sv-radio-button__box {
+/* CSS-only radio buttons - override icon font from siyavula-api.css */
+/* Match specificity of: .sv .sv-radio-button .sv-radio-button__input-faux .sv-radio-button__input + .sv-radio-button__box */
+.sv .sv-radio-button .sv-radio-button__input-faux .sv-radio-button__input + .sv-radio-button__box {
     display: inline-block;
     width: 18px;
     height: 18px;
@@ -33,11 +34,24 @@ body, html {
     margin-right: 8px;
 }
 
-.sv-radio-button__input:checked + .sv-radio-button__box {
+/* Hide icon font ::before */
+.sv .sv-radio-button .sv-radio-button__input-faux .sv-radio-button__input + .sv-radio-button__box:before {
+    content: none;
+    display: none;
+}
+
+.sv .sv-radio-button .sv-radio-button__input-faux .sv-radio-button__input:checked + .sv-radio-button__box {
     border-color: #008bb2;
 }
 
-.sv-radio-button__input:checked + .sv-radio-button__box::after {
+/* Hide checked icon font ::before */
+.sv .sv-radio-button .sv-radio-button__input-faux .sv-radio-button__input:checked + .sv-radio-button__box:before {
+    content: none;
+    display: none;
+}
+
+/* Add our own checked indicator */
+.sv .sv-radio-button .sv-radio-button__input-faux .sv-radio-button__input:checked + .sv-radio-button__box::after {
     content: '';
     display: block;
     width: 10px;
