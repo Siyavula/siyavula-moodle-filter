@@ -2,9 +2,7 @@ body, html {
     width: auto;
 }
 
-.monassis .icon{
-    font-family: 'sv-ui-icon';
-}
+/* Removed sv-ui-icon font - using pure CSS for radio buttons instead */
 
 .icon{
     font-family: 'FontAwesome';
@@ -23,7 +21,7 @@ body, html {
     float: right;
 }
 
-/* Fallback styles for Siyavula radio buttons when icon font fails to load */
+/* CSS-only radio buttons - no icon font dependency */
 .sv-radio-button__box {
     display: inline-block;
     width: 18px;

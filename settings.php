@@ -162,48 +162,55 @@ $userschool = new admin_setting_configselect(
 if ($id == 'filtersettingsiyavula') {
     $clientip = $_SERVER['REMOTE_ADDR'];
     $siyavulaconfig = get_config('filter_siyavula');
-    $gettoken = siyavula_get_user_token($siyavulaconfig, $clientip);
-    $tokenresponse = $gettoken;
-    $getusers = get_list_users($siyavulaconfig, $gettoken);
 
-    if (!empty($tokenresponse)) {
-        $tokenget = new admin_setting_description(
-            'filter_siyavula/token_get',
-            get_string('siyavula_tokenget', 'filter_siyavula'),
-            $tokenresponse
-        );
-        $settings->add($tokenget);
-    }
+    // Wrap API calls in try-catch to handle connection errors gracefully
+    try {
+        $gettoken = siyavula_get_user_token($siyavulaconfig, $clientip);
+        $tokenresponse = $gettoken;
+        $getusers = get_list_users($siyavulaconfig, $gettoken);
 
-    if (!empty($getusers) && !empty($tokenresponse)) {
-
-        foreach ($getusers as $user) {
-            $data[] = $user->external_user_id ?: $user->email;
-            $testtoken = '<a target="_blank" href="' . $CFG->wwwroot .
-                '/filter/siyavula/test_external_usertoken.php?token=' . $tokenresponse .
-                '">' . get_string('test_external_usertoken', 'filter_siyavula') . '</a>';
+        if (!empty($tokenresponse)) {
+            $tokenget = new admin_setting_description(
+                'filter_siyavula/token_get',
+                get_string('siyavula_tokenget', 'filter_siyavula'),
+                $tokenresponse
+            );
+            $settings->add($tokenget);
         }
-        $listusers = new admin_setting_configselect(
-            'users_filter_siyavula/list_users',
-            get_string('siyavula_list_users', 'filter_siyavula'),
-            $testtoken,
+
+        if (!empty($getusers) && !empty($tokenresponse)) {
+
+            foreach ($getusers as $user) {
+                $data[] = $user->external_user_id ?: $user->email;
+                $testtoken = '<a target="_blank" href="' . $CFG->wwwroot .
+                    '/filter/siyavula/test_external_usertoken.php?token=' . $tokenresponse .
+                    '">' . get_string('test_external_usertoken', 'filter_siyavula') . '</a>';
+            }
+            $listusers = new admin_setting_configselect(
+                'users_filter_siyavula/list_users',
+                get_string('siyavula_list_users', 'filter_siyavula'),
+                $testtoken,
+                '',
+                $data
+            );
+
+            $settings->add($listusers);
+        }
+
+        // Client school field.
+        $clientschools = filter_siyavula_get_clientschools($siyavulaconfig, $gettoken);
+        $clientschool = new admin_setting_configselect(
+            'filter_siyavula/client_school_id',
+            get_string('siyavula_userschool', 'filter_siyavula'),
+            get_string('siyavula_userschool_desc', 'filter_siyavula'),
             '',
-            $data
+            $clientschools
         );
-
-        $settings->add($listusers);
+        $settings->add($clientschool);
+    } catch (moodle_exception $e) {
+        // Display user-friendly error notification when API connection fails
+        \core\notification::error($e->getMessage());
     }
-
-    // Client school field.
-    $clientschools = filter_siyavula_get_clientschools($siyavulaconfig, $gettoken);
-    $clientschool = new admin_setting_configselect(
-        'filter_siyavula/client_school_id',
-        get_string('siyavula_userschool', 'filter_siyavula'),
-        get_string('siyavula_userschool_desc', 'filter_siyavula'),
-        '',
-        $clientschools
-    );
-    $settings->add($clientschool);
 
     // Show messages if filter response correct create Token and external toke....
     if (get_config('filter_siyavula', 'admin_show_siyavula_notify_error') == true) {
