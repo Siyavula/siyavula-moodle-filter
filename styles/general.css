@@ -2,9 +2,10 @@ body, html {
     width: auto;
 }
 
-.monassis .icon{
-    font-family: 'sv-ui-icon';
-}
+/* sv-ui-icon font removed: Icon fonts can fail to load in production environments
+ * (network issues, CDN problems, CORS restrictions), breaking form elements.
+ * Pure CSS implementations below provide reliable fallbacks for radio buttons and checkboxes.
+ */
 
 .icon{
     font-family: 'FontAwesome';
@@ -23,8 +24,14 @@ body, html {
     float: right;
 }
 
-/* Fallback styles for Siyavula radio buttons when icon font fails to load */
-.sv-radio-button__box {
+/* Radio buttons: Pure CSS implementation to avoid dependency on sv-ui-icon font
+ * The icon font sometimes fails to load in production due to network/CDN issues,
+ * leaving users with broken or invisible radio buttons. This CSS provides a
+ * reliable fallback that works whether the font loads or not.
+ * High specificity selector matches the theme's selector to ensure these styles
+ * override the icon font styles from siyavula-api.css (which loads first).
+ */
+.sv .sv-radio-button .sv-radio-button__input-faux .sv-radio-button__input + .sv-radio-button__box {
     display: inline-block;
     width: 18px;
     height: 18px;
@@ -35,11 +42,24 @@ body, html {
     margin-right: 8px;
 }
 
-.sv-radio-button__input:checked + .sv-radio-button__box {
+/* Prevent icon font from rendering (causes duplicates when both render) */
+.sv .sv-radio-button .sv-radio-button__input-faux .sv-radio-button__input + .sv-radio-button__box:before {
+    content: none;
+    display: none;
+}
+
+.sv .sv-radio-button .sv-radio-button__input-faux .sv-radio-button__input:checked + .sv-radio-button__box {
     border-color: #008bb2;
 }
 
-.sv-radio-button__input:checked + .sv-radio-button__box::after {
+/* Prevent checked icon font from rendering */
+.sv .sv-radio-button .sv-radio-button__input-faux .sv-radio-button__input:checked + .sv-radio-button__box:before {
+    content: none;
+    display: none;
+}
+
+/* Pure CSS filled circle to indicate checked state */
+.sv .sv-radio-button .sv-radio-button__input-faux .sv-radio-button__input:checked + .sv-radio-button__box::after {
     content: '';
     display: block;
     width: 10px;
@@ -50,6 +70,53 @@ body, html {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+/* Checkboxes: Pure CSS implementation to avoid dependency on sv-ui-icon font
+ * Same reasoning as radio buttons - icon font can fail to load in production.
+ * Provides consistent checkbox appearance regardless of font loading status.
+ * High specificity matches theme selector to override icon font styles.
+ */
+.sv .sv-checkbox .sv-checkbox__input-faux .sv-checkbox__input + .sv-checkbox__box {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid #848484;
+    border-radius: 3px;
+    position: relative;
+    vertical-align: middle;
+    margin-right: 8px;
+}
+
+/* Prevent icon font from rendering (causes duplicates when both render) */
+.sv .sv-checkbox .sv-checkbox__input-faux .sv-checkbox__input + .sv-checkbox__box:before {
+    content: none;
+    display: none;
+}
+
+.sv .sv-checkbox .sv-checkbox__input-faux .sv-checkbox__input:checked + .sv-checkbox__box {
+    border-color: #008bb2;
+    background: #008bb2;
+}
+
+/* Prevent checked icon font from rendering */
+.sv .sv-checkbox .sv-checkbox__input-faux .sv-checkbox__input:checked + .sv-checkbox__box:before {
+    content: none;
+    display: none;
+}
+
+/* Pure CSS checkmark using rotated border trick */
+.sv .sv-checkbox .sv-checkbox__input-faux .sv-checkbox__input:checked + .sv-checkbox__box::after {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 8px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    position: absolute;
+    top: 2px;
+    left: 6px;
+    transform: rotate(45deg);
 }
 
 input.toc {
