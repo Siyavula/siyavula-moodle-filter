@@ -226,10 +226,13 @@ function siyavula_create_user($siyavulaconfig, $token) {
     // Format: external_user_id.client_name.api
     $username = $externaluserid . '.' . $siyavulaconfig->client_name . '.api';
 
+    // Generate a secure random password for the user
+    $securepassword = bin2hex(random_bytes(16));
+
     $data = array(
         'external_user_id' => $externaluserid,
         "role" => "Learner",
-        "password" => "123456",
+        "password" => $securepassword,
         "grade" => isset($USER->profile['grade']) ? $USER->profile['grade'] : 1,
         "curriculum" => isset($USER->profile['curriculum']) ? $USER->profile['curriculum'] : $siyavulaconfig->client_curriculum,
         'dialling_code' => '27',
