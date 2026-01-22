@@ -31,8 +31,32 @@
             {{#activityid}} additionalConfig['activityId'] = '{{activityid}}'; {{/activityid}}
             {{#responseid}} additionalConfig['responseId'] = '{{responseid}}'; {{/responseid}}
 
+            {{#sectionid}}
+            var origCreate;
+            {{/sectionid}}
             try {
                 const uniqueid = "#{{ uniqueid }}";
+
+                {{#sectionid}}
+                // For practice activities, we need to wrap updateUI BEFORE the activity initializes
+                // Load the module first
+                const updateMastery = await new Promise(function(resolve) {
+                    require(['filter_siyavula/updatemastery'], resolve);
+                });
+
+                // Temporarily wrap the manager's createActivity to inject our wrapper
+                origCreate = siyavulaManager.createActivity.bind(siyavulaManager);
+                siyavulaManager.createActivity = async function(cId, cfg, type, params) {
+                    const api = new Siyavula.SiyavulaAPI(cfg);
+                    // Wrap updateUI BEFORE binding/initializing
+                    updateMastery.wrapAPI(api);
+                    api.bindToContainer(document.querySelector(cId));
+                    siyavulaManager.activities.set(cId, api);
+                    await api.initialize(type, params);
+                    return api;
+                };
+                {{/sectionid}}
+
                 const standalone = await siyavulaManager.createActivity(
                     uniqueid,
                     config,
@@ -46,6 +70,13 @@
 
             } catch (error) {
                 console.error("Failed to initialize activities:", error);
+            } finally {
+                {{#sectionid}}
+                // Restore original createActivity
+                if (origCreate) {
+                    siyavulaManager.createActivity = origCreate;
+                }
+                {{/sectionid}}
             }
 
         {{/activitieslist}}
