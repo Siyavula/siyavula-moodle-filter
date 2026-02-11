@@ -233,7 +233,7 @@ function siyavula_create_user($siyavulaconfig, $token) {
         'external_user_id' => $externaluserid,
         "role" => "Learner",
         "password" => $securepassword,
-        "grade" => isset($USER->profile['grade']) ? $USER->profile['grade'] : 1,
+        "grade" => isset($USER->profile['grade']) ? $USER->profile['grade'] : 8,
         "curriculum" => isset($USER->profile['curriculum']) ? $USER->profile['curriculum'] : $siyavulaconfig->client_curriculum,
         'dialling_code' => '27',
     );
