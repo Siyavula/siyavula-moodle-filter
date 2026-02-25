@@ -48,8 +48,10 @@
                 origCreate = siyavulaManager.createActivity.bind(siyavulaManager);
                 siyavulaManager.createActivity = async function(cId, cfg, type, params) {
                     const api = new Siyavula.SiyavulaAPI(cfg);
-                    // Wrap updateUI BEFORE binding/initializing
-                    updateMastery.wrapAPI(api);
+                    // Wrap updateUI BEFORE binding/initializing.
+                    // Pass cmid so the wrapper can trigger a Moodle grade update
+                    // after each question submission.
+                    updateMastery.wrapAPI(api, {{config.cmid}}, {{sectionid}});
                     api.bindToContainer(document.querySelector(cId));
                     siyavulaManager.activities.set(cId, api);
                     await api.initialize(type, params);
