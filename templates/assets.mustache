@@ -70,6 +70,16 @@
                 // It helps to manage the activities and their states in siyavula module.
                 window.siyavulaActivities[uniqueid] = standalone;
 
+                {{#assignmentid}}{{#config.cmid}}
+                // For assignment activities rendered from mod_siyavulaassignment,
+                // bind renderer events to update the progress badge and send
+                // the final score to the Moodle gradebook on completion.
+                const updateAssignmentGrade = await new Promise(function(resolve) {
+                    require(['mod_siyavulaassignment/updateassignmentgrade'], resolve);
+                });
+                updateAssignmentGrade.bindEvents(standalone, {{config.cmid}});
+                {{/config.cmid}}{{/assignmentid}}
+
             } catch (error) {
                 console.error("Failed to initialize activities:", error);
             } finally {
