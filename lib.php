@@ -557,12 +557,22 @@ function filter_siyavula_get_clientschools($siyavulaconfig, $token) {
 /**
  * Set the user's school in Siyavula.
  *
+ * The school ID is resolved in order:
+ *   1. The Moodle user profile field named by the 'userschool' config setting.
+ *   2. The global 'client_school_id' config setting as a fallback.
+ *
+ * This per-user resolution allows students from different schools to be enrolled
+ * in the same Moodle course without requiring separate cohorts or course copies.
+ * Teachers can then filter the Moodle gradebook by the school profile field to
+ * see school-level progress.
+ *
  * @param object $siyavulaconfig Configuration object for Siyavula.
  * @param string $token JWT token for authentication.
- * @param object $response Response from the Siyavula API.
- * @return array List of schools or an empty array if no schools are found.
+ * @param object $response Response from the Siyavula API (must contain external_user_id).
+ * @return array|false API response array, empty array on API error, or false if skipped.
  */
 function filter_siyavula_set_user_school($siyavulaconfig, $token, $response) {
+    global $USER;
 
     if (empty($token)) {
         debugging(get_string('token_and_token_external', 'filter_siyavula'), DEBUG_NORMAL);
@@ -570,21 +580,39 @@ function filter_siyavula_set_user_school($siyavulaconfig, $token, $response) {
     }
 
     $externaluserid = $response->external_user_id ?? '';
-    $schoolid = $siyavulaconfig->client_school_id ?? '';
+    if (empty($externaluserid)) {
+        return false;
+    }
 
-    if (empty($externaluserid) || empty($schoolid)) {
+    // Prefer per-user school from the configured Moodle profile field.
+    $schoolid        = '';
+    $userschoolfield = trim($siyavulaconfig->userschool ?? '');
+    if (!empty($userschoolfield)) {
+        // profile_load_data() populates $USER->profile_field_{fieldname}.
+        profile_load_data($USER);
+        $profilekey = 'profile_field_' . $userschoolfield;
+        if (!empty($USER->$profilekey)) {
+            $schoolid = (string)$USER->$profilekey;
+        }
+    }
+
+    // Fall back to the global client school when no per-user value is set.
+    if (empty($schoolid)) {
+        $schoolid = $siyavulaconfig->client_school_id ?? '';
+    }
+
+    if (empty($schoolid)) {
         return false;
     }
 
     $schoolresponse = siyavula_api_request(
         $siyavulaconfig,
-        "api/siyavula/v1/user/" . $externaluserid ."/school/" . $schoolid,
+        "api/siyavula/v1/user/" . $externaluserid . "/school/" . $schoolid,
         'PUT',
         array(
             'token' => $token
         )
     );
-
 
     if (isset($schoolresponse->errors)) {
         foreach ($schoolresponse->errors as $error) {
