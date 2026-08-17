@@ -175,6 +175,9 @@ class text_filter extends \siyavula_moodle_text_filter {
             'showlivepreview' => $showlivepreview,
             'showbtnretry' => $showbtnretry,
             'wwwroot' => $CFG->wwwroot,
+            // Only set when the filtered content lives on a course module page. Practice
+            // activities emit this into JS, so it must always be a valid integer.
+            'cmid' => !empty($PAGE->cm->id) ? $PAGE->cm->id : 0,
         ];
 
         $activitieslist = [];
